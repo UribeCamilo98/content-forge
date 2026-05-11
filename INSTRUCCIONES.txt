@@ -1,0 +1,126 @@
+========================================
+  CONTENTFORGE - PLAN DEL PROYECTO
+========================================
+
+OBJETIVO
+--------
+App web local (localhost) que genera imágenes estáticas
+para TikTok (carruseles, frases, anuncios) usando
+Python + Flask + Pillow.
+
+ESTRUCTURA DEL PROYECTO
+-----------------------
+contentforge/
+│
+├── app.py                  # Punto de entrada - servidor Flask + rutas
+├── config.py               # Configuración global (colores, fuentes, medidas)
+├── requirements.txt        # Dependencias (Flask, Pillow)
+│
+├── generator/              # Módulo de generación de imágenes
+│   ├── __init__.py
+│   ├── base.py             # Clase base Plantilla (la heredan todas)
+│   ├── carousel.py         # Template: carrusel de imágenes
+│   ├── quote.py            # Template: frase/reflexión
+│   └── announcement.py     # Template: anuncio
+│
+├── utils/                  # Utilidades reutilizables
+│   ├── __init__.py
+│   ├── colors.py           # Paletas de colores predefinidas
+│   └── typography.py       # Manejo de fuentes y textos
+│
+├── templates/              # HTML (Flask los usa para la web)
+│   └── index.html
+│
+├── static/                 # CSS/JS para la interfaz web
+│   ├── style.css
+│   └── script.js
+│
+├── tests/                  # Tests unitarios (pytest)
+│   ├── test_base.py        # Test de PlantillaBase
+│   ├── test_colors.py      # Test de paletas de colores
+│   ├── test_carousel.py    # Test de generación de carrusel
+│   └── test_quote.py       # Test de generación de frases
+│
+└── output/                 # Acá se guardan las imágenes generadas
+
+
+PRINCIPIO MODULAR
+-----------------
+- Cada archivo tiene UNA sola responsabilidad.
+- Para agregar un template nuevo:
+  1. Crear generator/mi_template.py
+  2. Heredar de PlantillaBase (de base.py)
+  3. Implementar el método generar()
+  Sin tocar nada del resto.
+
+
+PLAN SEMANAL (DÍAS)
+-------------------
+
+DÍA 1: Setup + Flask "Hola Mundo"
+  - Verificar Python instalado
+  - Crear entorno virtual
+  - pip install flask pillow
+  - Escribir app.py con ruta "/" que diga "Hola Mundo"
+  - Ejecutar y ver en navegador
+
+DÍA 2: Primera imagen con Pillow
+  - Crear generator/base.py (clase PlantillaBase)
+  - Crear utils/colors.py (paletas de colores)
+  - Crear utils/typography.py (manejo de fuentes)
+  - Generar imagen con fondo + texto desde app.py
+
+DÍA 3: Template Carrusel
+  - Crear generator/carousel.py
+  - Generar N imágenes con texto secuencial
+  - Guardar en output/
+
+DÍA 4: Interfaz web (formularios)
+  - Crear templates/index.html
+  - Formulario para ingresar texto del carrusel
+  - Botón "Generar" que llama a Flask
+
+DÍA 5: Diseño visual
+  - Agregar CSS (templates/style.css)
+  - Selector de colores/paletas
+  - Vista previa de imágenes
+
+DÍA 6: Exportación
+  - Descarga individual de imágenes
+  - Descarga ZIP de carrusel completo
+  - Pulido de estilos
+
+DÍA 7: Empaquetado + Pruebas
+  - PyInstaller para .exe portable
+  - Pruebas finales
+  - Ajustes
+
+
+MVP MÍNIMO (Días 1-2)
+---------------------
+1. Abrís http://localhost:5000
+2. Ves un formulario con un cuadro de texto
+3. Escribís una frase, apretás "Generar"
+4. Se descarga una imagen PNG con tu frase
+   sobre un fondo de color
+
+Son ~50 líneas de código.
+
+
+PRUEBAS UNITARIAS
+-----------------
+- Framework: pytest (pip install pytest)
+- Cada módulo tiene su archivo de test en tests/
+- Se corren con: pytest tests/ -v
+- Tests se escriben DESPUÉS del código de cada módulo
+- Ejemplo:
+  Día 2: creás colors.py → escribís test_colors.py
+  Día 3: creás carousel.py → escribís test_carousel.py
+
+
+REGLAS DE TRABAJO
+-----------------
+- Todo el código lo escribís VOS desde tu teclado.
+- Yo soy guía: explico, sugiero, corrijo errores.
+- Cada día termina con algo funcionando y visible.
+- Primero funciona, después se ve bonito.
