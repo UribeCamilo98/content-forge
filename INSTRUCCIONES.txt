@@ -57,14 +57,14 @@ PRINCIPIO MODULAR
 PLAN SEMANAL (DÍAS)
 -------------------
 
-DÍA 1: Setup + Flask "Hola Mundo"
-  - Verificar Python instalado
-  - Crear entorno virtual
-  - pip install flask pillow
-  - Escribir app.py con ruta "/" que diga "Hola Mundo"
-  - Ejecutar y ver en navegador
+DÍA 1: Setup + Flask "Hola Mundo" ✅ COMPLETADO
+  - Verificar Python instalado ✅
+  - Crear entorno virtual (.venv) ✅
+  - pip install flask pillow ✅
+  - Escribir app.py con ruta "/" que diga "Hola Mundo" ✅
+  - Ejecutar y ver en navegador (localhost:5000) ✅
 
-DÍA 2: Primera imagen con Pillow
+DÍA 2: Primera imagen con Pillow ⬅️ SIGUIENTE
   - Crear generator/base.py (clase PlantillaBase)
   - Crear utils/colors.py (paletas de colores)
   - Crear utils/typography.py (manejo de fuentes)
