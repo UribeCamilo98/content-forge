@@ -64,13 +64,13 @@ DÍA 1: Setup + Flask "Hola Mundo" ✅ COMPLETADO
   - Escribir app.py con ruta "/" que diga "Hola Mundo" ✅
   - Ejecutar y ver en navegador (localhost:5000) ✅
 
-DÍA 2: Primera imagen con Pillow ⬅️ SIGUIENTE
-  - Crear generator/base.py (clase PlantillaBase)
-  - Crear utils/colors.py (paletas de colores)
-  - Crear utils/typography.py (manejo de fuentes)
-  - Generar imagen con fondo + texto desde app.py
+DÍA 2: Primera imagen con Pillow ✅ COMPLETADO
+  - Crear generator/base.py (clase PlantillaBase) ✅
+  - Crear utils/colors.py (paletas de colores) ✅
+  - Crear utils/typography.py (manejo de fuentes) ✅
+  - Generar imagen con fondo + texto desde app.py ✅
 
-DÍA 3: Template Carrusel
+DÍA 3: Template Carrusel ⬅️ SIGUIENTE
   - Crear generator/carousel.py
   - Generar N imágenes con texto secuencial
   - Guardar en output/
