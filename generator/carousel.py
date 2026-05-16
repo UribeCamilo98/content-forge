@@ -1,0 +1,91 @@
+import re
+import os
+from datetime import datetime
+from generator.base import PlantillaBase
+from config import RUTA_OUTPUT
+
+class Carrusel(PlantillaBase):
+    def __init__(self, textos, color_fondo, color_texto, num_slides=None):
+        super().__init__(color_fondo,color_texto)
+        self.textos = self._procesar_textos(textos,num_slides)
+
+    def generar(self):
+        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+        ruta_carpeta = os.path.join(RUTA_OUTPUT, timestamp)
+        os.makedirs(ruta_carpeta,exist_ok=True)
+
+        for i, texto in enumerate(self.textos):
+            img = self._crear_imagen(texto)
+            nombre = f"slide_{i+1:02d}.png"
+            ruta = os.path.join(ruta_carpeta, nombre)
+            img.save(ruta)
+        
+        return ruta_carpeta
+
+    def _dividir_oraciones(self, texto):
+        oraciones = re.split(r'(?<=[.!?])\s+', texto.strip())
+        return [o for o in oraciones if o]
+    
+    def _distribuir(self, elementos, cantidad):
+        grupos = []
+        if cantidad <= 0:
+            return grupos
+        base = len(elementos) // cantidad
+        resto = len(elementos) % cantidad
+        idx=0
+        for i in range(min(cantidad, len(elementos))):
+            extra = 1 if i < resto else 0
+            tope = idx + base + extra
+            grupo = elementos[idx:tope]
+            grupos.append(" ".join(grupo))
+            idx=tope
+        return grupos
+    
+    def _dividir_parrafos(self, oraciones_por_parrafo, cant_parrafos, num_slides):
+        resultado = []
+        slides_por_parrafo = num_slides // cant_parrafos
+        resto = num_slides % cant_parrafos
+
+        for i, oraciones in enumerate(oraciones_por_parrafo):
+            extra = 1 if i < resto else 0
+            slides_para_este = slides_por_parrafo + extra
+            partes = self._distribuir(oraciones, slides_para_este)
+            resultado.extend(partes)
+        
+        while len(resultado) < num_slides:
+            resultado.append("...")
+        
+        return resultado
+
+    def _procesar_textos(self, textos, num_slides=None):
+        texto_normalizado= textos.replace('\r\n', '\n')
+        parrafos_raw = texto_normalizado.split('\n\n')
+        parrafos = []
+        for p in parrafos_raw:
+            p_limpio = p.strip()
+            if p_limpio != "":
+                parrafos.append(p_limpio)
+
+        oraciones_por_parrafo = []
+        for p in parrafos:
+            oraciones = self._dividir_oraciones(p)
+            oraciones_por_parrafo.append(oraciones)
+
+        cant_parrafos=len(parrafos)
+        if num_slides is None:
+            num_slides = min(cant_parrafos, 20)
+        else:
+            num_slides = min(num_slides,20)
+
+        if num_slides == cant_parrafos:
+            return parrafos
+        
+        if num_slides < cant_parrafos:
+            todas = []
+            for oraciones in oraciones_por_parrafo:
+                todas.extend(oraciones)
+            return self._distribuir(todas, num_slides)
+
+        if num_slides > cant_parrafos:
+            return self._dividir_parrafos(oraciones_por_parrafo,cant_parrafos,num_slides)
+

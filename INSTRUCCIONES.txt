@@ -18,10 +18,10 @@ contentforge/
 │
 ├── generator/              # Módulo de generación de imágenes
 │   ├── __init__.py
-│   ├── base.py             # Clase base Plantilla (la heredan todas)
-│   ├── carousel.py         # Template: carrusel de imágenes
-│   ├── quote.py            # Template: frase/reflexión
-│   └── announcement.py     # Template: anuncio
+│   ├── base.py             # Motor de dibujo (PlantillaBase)
+│   ├── carousel.py         # Clase Carrusel: procesa texto + dibuja + guarda
+│   ├── quote.py            # (placeholder)
+│   └── announcement.py     # (placeholder)
 │
 ├── utils/                  # Utilidades reutilizables
 │   ├── __init__.py
@@ -29,33 +29,37 @@ contentforge/
 │   └── typography.py       # Manejo de fuentes y textos
 │
 ├── templates/              # HTML (Flask los usa para la web)
-│   └── index.html
+│   └── index.html          # ⬅️ PENDIENTE (vacío)
 │
 ├── static/                 # CSS/JS para la interfaz web
-│   ├── style.css
-│   └── script.js
+│   ├── style.css           # ⬅️ PENDIENTE (vacío)
+│   └── script.js           # ⬅️ PENDIENTE (vacío)
 │
 ├── tests/                  # Tests unitarios (pytest)
-│   ├── test_base.py        # Test de PlantillaBase
-│   ├── test_colors.py      # Test de paletas de colores
-│   ├── test_carousel.py    # Test de generación de carrusel
-│   └── test_quote.py       # Test de generación de frases
+│   ├── test_base.py        # ⬅️ PENDIENTE (vacío)
+│   ├── test_colors.py      # ⬅️ PENDIENTE (vacío)
+│   ├── test_carousel.py    # ⬅️ PENDIENTE (vacío)
+│   └── test_quote.py       # ⬅️ PENDIENTE (vacío)
 │
 └── output/                 # Acá se guardan las imágenes generadas
+    └── YYYYMMDD_HHMMSS/    # 1 carpeta por generación (timestamp)
+        ├── slide_01.png
+        ├── slide_02.png
+        └── ...
 
 
 PRINCIPIO MODULAR
 -----------------
 - Cada archivo tiene UNA sola responsabilidad.
-- Para agregar un template nuevo:
-  1. Crear generator/mi_template.py
-  2. Heredar de PlantillaBase (de base.py)
-  3. Implementar el método generar()
-  Sin tocar nada del resto.
+- PlantillaBase = motor de dibujo puro. Crea imagen + dibuja texto centrado.
+  No sabe de archivos ni carpetas.
+  Método público: _crear_imagen(texto) → retorna PIL.Image
+- Carrusel = clase principal. Hereda de PlantillaBase.
+  __init__ procesa texto crudo → lista de slides.
+  generar() crea carpeta, llama _crear_imagen() por cada slide, guarda.
+- Quote y Announcement son Carrusel con 1 slide (misma mecánica).
+- Output simple: cada generación crea su carpeta con timestamp dentro de output/.
 
-
-PLAN SEMANAL (DÍAS)
--------------------
 
 DÍA 1: Setup + Flask "Hola Mundo" ✅ COMPLETADO
   - Verificar Python instalado ✅
@@ -70,10 +74,19 @@ DÍA 2: Primera imagen con Pillow ✅ COMPLETADO
   - Crear utils/typography.py (manejo de fuentes) ✅
   - Generar imagen con fondo + texto desde app.py ✅
 
-DÍA 3: Template Carrusel ⬅️ SIGUIENTE
-  - Crear generator/carousel.py
-  - Generar N imágenes con texto secuencial
-  - Guardar en output/
+DÍA 3: Carrusel funcional ✅ COMPLETADO
+  - base.py refactorizado: PlantillaBase es solo motor de dibujo
+    - __init__ solo recibe color_fondo, color_texto (sin self.texto)
+    - _crear_imagen(texto) dibuja y retorna PIL.Image
+    - generar() eliminado
+  - carousel.py completo:
+    - _dividir_oraciones: split texto por . ! ?
+    - _distribuir: reparte N elementos en M grupos parejos
+    - _dividir_parrafos: asigna slides proporcionalmente entre párrafos
+    - _procesar_textos: texto crudo → lista de slides
+    - generar(): crea carpeta timestamp, itera slides, dibuja con _crear_imagen(), guarda
+  - app.py conectado con ruta /generar usando Carrusel (texto de prueba)
+  - Output: 1 carpeta timestamp por generación en output/
 
 DÍA 4: Interfaz web (formularios)
   - Crear templates/index.html
