@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ContentForge</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <h1>ContentForge</h1>
+        <p>Generador de carruseles</p>
+        <form action="/generar" method="POST">
+            <label for="texto">Texto del carrusel:</label>
+            <textarea name="texto" id="texto" rows="10" placeholder="Escribí tu texto aquí..." required></textarea>
+            <label for="paleta">Paleta de colores:</label>
+            <select name="paleta" id="paleta">
+                <option value="oscuro">Oscuro</option>
+                <option value="claro">Claro</option>
+                <option value="vibrante">Vibrante</option>
+                <option value="naturaleza">Naturaleza</option>
+                <option value="pastel">Pastel</option>
+                <option value="neon">Neon</option>
+            </select>
+            <button type="submit">Generar</button>
+        </form>
+        {% if ruta %}
+        <div class="resultado">
+            <h2>Carrusel generado</h2>
+            <p>Ruta: <code>{{ ruta }}</code></p>
+        </div>
+        {% endif %}
+    </div>
+</body>
+</html>

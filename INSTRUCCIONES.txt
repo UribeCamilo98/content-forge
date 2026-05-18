@@ -16,30 +16,35 @@ contentforge/
 ├── config.py               # Configuración global (colores, fuentes, medidas)
 ├── requirements.txt        # Dependencias (Flask, Pillow)
 │
+├── fonts/                  # Fuentes .ttf para los textos
+│   └── (tus fuentes aquí)
+│
+├── images/                 # Sets de imágenes para fondos/collages
+│   └── (tus colecciones aquí)
+│
 ├── generator/              # Módulo de generación de imágenes
 │   ├── __init__.py
 │   ├── base.py             # Motor de dibujo (PlantillaBase)
-│   ├── carousel.py         # Clase Carrusel: procesa texto + dibuja + guarda
-│   ├── quote.py            # (placeholder)
-│   └── announcement.py     # (placeholder)
+│   └── carousel.py         # Clase Carrusel: procesa texto + dibuja + guarda
 │
 ├── utils/                  # Utilidades reutilizables
 │   ├── __init__.py
 │   ├── colors.py           # Paletas de colores predefinidas
+│   ├── fonts.py            # Escáner y selector de fuentes
 │   └── typography.py       # Manejo de fuentes y textos
 │
 ├── templates/              # HTML (Flask los usa para la web)
-│   └── index.html          # ⬅️ PENDIENTE (vacío)
+│   └── index.html          # Formulario web para generar carruseles ✅
 │
 ├── static/                 # CSS/JS para la interfaz web
-│   ├── style.css           # ⬅️ PENDIENTE (vacío)
-│   └── script.js           # ⬅️ PENDIENTE (vacío)
+│   ├── style.css           # Estilos del formulario ✅
+│   └── script.js           # ⬅️ PENDIENTE
 │
-├── tests/                  # Tests unitarios (pytest)
-│   ├── test_base.py        # ⬅️ PENDIENTE (vacío)
-│   ├── test_colors.py      # ⬅️ PENDIENTE (vacío)
-│   ├── test_carousel.py    # ⬅️ PENDIENTE (vacío)
-│   └── test_quote.py       # ⬅️ PENDIENTE (vacío)
+├── tests/                  # Tests unitarios (pytest) — ⬅️ PENDIENTES
+│   ├── test_base.py
+│   ├── test_colors.py
+│   ├── test_carousel.py
+│   └── test_fonts.py
 │
 └── output/                 # Acá se guardan las imágenes generadas
     └── YYYYMMDD_HHMMSS/    # 1 carpeta por generación (timestamp)
@@ -57,8 +62,35 @@ PRINCIPIO MODULAR
 - Carrusel = clase principal. Hereda de PlantillaBase.
   __init__ procesa texto crudo → lista de slides.
   generar() crea carpeta, llama _crear_imagen() por cada slide, guarda.
-- Quote y Announcement son Carrusel con 1 slide (misma mecánica).
+- Carrusel maneja N slides (1-20), cubre casos de quote/anuncio.
+- FontManager = escanea fonts/ y provee lista de fuentes disponibles.
+- ImageManager = administra sets de imágenes en images/.
+- LayoutEngine = aplica plantillas predefinidas (texto+imágenes).
+  Método público: aplicar(texto, imagenes, template) → dict de posiciones
+- VisualEditor (v1.2) = canvas JS en frontend para edición en vivo.
 - Output simple: cada generación crea su carpeta con timestamp dentro de output/.
+
+
+ROADMAP DE VERSIONES
+--------------------
+v1.0 (Texto avanzado)
+  - Fuentes externas + selector
+  - Tamaño de fuente manual
+  - Alineación (izquierda, centro, derecha, justificado)
+  - Presets de tamaño de slide (cuadrado, vertical, horizontal)
+  - Cantidad de slides manual
+
+v1.1 (Imágenes + layouts automáticos)
+  - Upload de imágenes + organización en sets
+  - Layouts predefinidos (texto izq/dcha/centro, collage alrededor)
+  - Generación automática de collages con imágenes del set
+  - Ajuste manual de posición/tamaño de imágenes
+
+v1.2 (Editor visual)
+  - Canvas en vivo en el navegador
+  - Gestión de capas completa
+  - Arrastrar, soltar, redimensionar elementos
+  - Galería de imágenes precargadas
 
 
 DÍA 1: Setup + Flask "Hola Mundo" ✅ COMPLETADO
@@ -88,36 +120,53 @@ DÍA 3: Carrusel funcional ✅ COMPLETADO
   - app.py conectado con ruta /generar usando Carrusel (texto de prueba)
   - Output: 1 carpeta timestamp por generación en output/
 
-DÍA 4: Interfaz web (formularios)
-  - Crear templates/index.html
-  - Formulario para ingresar texto del carrusel
-  - Botón "Generar" que llama a Flask
+DÍA 4: Interfaz web (formularios) ✅ COMPLETADO
+  - app.py: rutas `/` (GET con index.html) y `/generar` (POST con formulario) ✅
+  - templates/index.html: form con textarea + selector de paletas + botón ✅
+  - static/style.css: estilos básicos (tarjeta centrada, formulario, botón) ✅
+  - Ctrl+F5 para refrescar caché del navegador ✅
+  - Nota: Se eliminaron quote.py y announcement.py (Carrusel los cubre) ✅
 
-DÍA 5: Diseño visual
-  - Agregar CSS (templates/style.css)
-  - Selector de colores/paletas
-  - Vista previa de imágenes
+DÍA 5: Texto avanzado — Fuentes y tipografía (v1.0)
+  - Crear carpeta fonts/ con .ttf
+  - utils/fonts.py: escanear fonts/, cargar fuentes disponibles
+  - base.py: aceptar fuente personalizada + tamaño manual + alineación
+  - PlantillaBase._crear_imagen(): nuevos parámetros (fuente, tamaño, alineación)
+  - index.html: selector de fuente, slider de tamaño, radios de alineación
+  - app.py: pasar nuevos parámetros al Carrusel
 
-DÍA 6: Exportación
-  - Descarga individual de imágenes
-  - Descarga ZIP de carrusel completo
-  - Pulido de estilos
+DÍA 6: Presets de tamaño y slides manuales (v1.0)
+  - config.py: agregar PRESETS_TAMANO (1080×1080, 1080×1920, 1920×1080)
+  - carousel.py: recibir num_slides y tamaño desde el formulario
+  - index.html: selector de preset de tamaño, input de cantidad de slides
+  - CSS responsivo para los nuevos controles
 
-DÍA 7: Empaquetado + Pruebas
-  - PyInstaller para .exe portable
-  - Pruebas finales
-  - Ajustes
+DÍA 7: Imágenes de fondo + layouts (v1.1)
+  - Crear images/ con sets de ejemplo
+  - utils/images.py: manejo de colecciones de imágenes
+  - base.py: dibujar imagen de fondo + texto encima
+  - Layouts predefinidos (texto-izquierda, texto-derecha, texto-centro)
+  - index.html: selector de set de imágenes, uploader de imágenes
+  - app.py: rutas /upload y /images para servir imágenes
+
+DÍA 8+: Collages automáticos + ajuste manual (v1.1)
+  - LayoutEngine: distribuir imágenes automáticamente en collage
+  - Layouts alrededor del texto
+  - Ajuste de posición/tamaño desde frontend
+
+v1.2 (Futuro): Editor visual con canvas en vivo
+  - Gestión de capas completa
+  - Arrastrar, soltar, redimensionar en navegador
+  - Preview en tiempo real
 
 
-MVP MÍNIMO (Días 1-2)
+MVP ACTUAL (Días 1-4)
 ---------------------
 1. Abrís http://localhost:5000
-2. Ves un formulario con un cuadro de texto
-3. Escribís una frase, apretás "Generar"
-4. Se descarga una imagen PNG con tu frase
-   sobre un fondo de color
-
-Son ~50 líneas de código.
+2. Ves un formulario con textarea + selector de paletas
+3. Escribís un texto, elegís paleta, apretás "Generar"
+4. Se genera un carrusel de N slides en output/AAAAMMDD_HHMMSS/
+5. Se muestra la ruta de la carpeta generada
 
 
 PRUEBAS UNITARIAS
