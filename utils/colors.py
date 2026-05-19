@@ -4,7 +4,8 @@ PALETAS = {
     "vibrante": {"fondo": (255, 65, 54), "texto": (255, 255, 255)},
     "naturaleza": {"fondo": (34, 139, 34), "texto": (255, 255, 255)},
     "pastel": {"fondo": (255, 182, 193), "texto": (80, 40, 60)},
-    "neon": {"fondo": (0, 0, 0), "texto": (57, 255, 20)}
+    "neon": {"fondo": (0, 0, 0), "texto": (57, 255, 20)},
+    "sabrina":{"fondo":(242, 233, 216), "texto":(140, 92, 50)}
 }
 
 def obtener_paleta(nombre):
