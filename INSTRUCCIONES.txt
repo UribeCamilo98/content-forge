@@ -16,8 +16,10 @@ contentforge/
 ├── config.py               # Configuración global (colores, fuentes, medidas)
 ├── requirements.txt        # Dependencias (Flask, Pillow)
 │
-├── fonts/                  # Fuentes .ttf para los textos
-│   └── (tus fuentes aquí)
+├── fonts/                  # Fuentes .ttf para los textos ✅
+│   ├── Micro5-Regular.ttf
+│   ├── RubikGlitch-Regular.ttf
+│   └── UncialAntiqua-Regular.ttf
 │
 ├── images/                 # Sets de imágenes para fondos/collages
 │   └── (tus colecciones aquí)
@@ -30,7 +32,7 @@ contentforge/
 ├── utils/                  # Utilidades reutilizables
 │   ├── __init__.py
 │   ├── colors.py           # Paletas de colores predefinidas
-│   ├── fonts.py            # Escáner y selector de fuentes
+│   ├── fonts.py            # Escáner y selector de fuentes ✅
 │   └── typography.py       # Manejo de fuentes y textos
 │
 ├── templates/              # HTML (Flask los usa para la web)
@@ -40,11 +42,11 @@ contentforge/
 │   ├── style.css           # Estilos del formulario ✅
 │   └── script.js           # ⬅️ PENDIENTE
 │
-├── tests/                  # Tests unitarios (pytest) — ⬅️ PENDIENTES
-│   ├── test_base.py
-│   ├── test_colors.py
-│   ├── test_carousel.py
-│   └── test_fonts.py
+├── tests/                  # Tests unitarios (pytest) ✅
+│   ├── test_base.py        ✅
+│   ├── test_colors.py      ✅
+│   ├── test_carousel.py    ✅
+│   └── test_fonts.py       ✅
 │
 └── output/                 # Acá se guardan las imágenes generadas
     └── YYYYMMDD_HHMMSS/    # 1 carpeta por generación (timestamp)
@@ -56,14 +58,15 @@ contentforge/
 PRINCIPIO MODULAR
 -----------------
 - Cada archivo tiene UNA sola responsabilidad.
-- PlantillaBase = motor de dibujo puro. Crea imagen + dibuja texto centrado.
-  No sabe de archivos ni carpetas.
-  Método público: _crear_imagen(texto) → retorna PIL.Image
+- PlantillaBase = motor de dibujo puro. Crea imagen + dibuja texto con
+  fuente, tamaño y alineación configurables. No sabe de archivos ni carpetas.
+  Método público: _crear_imagen(texto, fuente, tamano, alineacion) → retorna PIL.Image
 - Carrusel = clase principal. Hereda de PlantillaBase.
   __init__ procesa texto crudo → lista de slides.
   generar() crea carpeta, llama _crear_imagen() por cada slide, guarda.
+  Recibe y pasa parámetros de fuente, tamaño y alineación.
 - Carrusel maneja N slides (1-20), cubre casos de quote/anuncio.
-- FontManager = escanea fonts/ y provee lista de fuentes disponibles.
+- FontManager = escanea fonts/ y provee lista de fuentes disponibles. ✅
 - ImageManager = administra sets de imágenes en images/.
 - LayoutEngine = aplica plantillas predefinidas (texto+imágenes).
   Método público: aplicar(texto, imagenes, template) → dict de posiciones
@@ -127,15 +130,17 @@ DÍA 4: Interfaz web (formularios) ✅ COMPLETADO
   - Ctrl+F5 para refrescar caché del navegador ✅
   - Nota: Se eliminaron quote.py y announcement.py (Carrusel los cubre) ✅
 
-DÍA 5: Texto avanzado — Fuentes y tipografía (v1.0)
-  - Crear carpeta fonts/ con .ttf
-  - utils/fonts.py: escanear fonts/, cargar fuentes disponibles
-  - base.py: aceptar fuente personalizada + tamaño manual + alineación
-  - PlantillaBase._crear_imagen(): nuevos parámetros (fuente, tamaño, alineación)
-  - index.html: selector de fuente, slider de tamaño, radios de alineación
-  - app.py: pasar nuevos parámetros al Carrusel
+DÍA 5: Texto avanzado — Fuentes y tipografía (v1.0) ✅ COMPLETADO
+  - Crear carpeta fonts/ con .ttf (Micro5, RubikGlitch, UncialAntiqua) ✅
+  - utils/fonts.py: FontManager escanea fonts/, carga fuentes disponibles ✅
+  - base.py: acepta fuente personalizada + tamaño manual + alineación ✅
+  - PlantillaBase._crear_imagen(): nuevos parámetros (fuente, tamaño, alineación) ✅
+  - Auto-ajuste: si el texto no entra, reduce tamaño hasta que quepa ✅
+  - index.html: selector de fuente, slider de tamaño, radios de alineación ✅
+  - app.py: lee nuevos campos y los pasa al Carrusel ✅
+  - tests/test_fonts.py: tests unitarios para FontManager ✅
 
-DÍA 6: Presets de tamaño y slides manuales (v1.0)
+DÍA 6: Presets de tamaño y slides manuales (v1.0) ⬅️ SIGUIENTE
   - config.py: agregar PRESETS_TAMANO (1080×1080, 1080×1920, 1920×1080)
   - carousel.py: recibir num_slides y tamaño desde el formulario
   - index.html: selector de preset de tamaño, input de cantidad de slides
@@ -160,11 +165,11 @@ v1.2 (Futuro): Editor visual con canvas en vivo
   - Preview en tiempo real
 
 
-MVP ACTUAL (Días 1-4)
----------------------
+MVP ACTUAL (Días 1-5)
+--------------------
 1. Abrís http://localhost:5000
-2. Ves un formulario con textarea + selector de paletas
-3. Escribís un texto, elegís paleta, apretás "Generar"
+2. Ves un formulario con textarea + selector de paletas + selector de fuente + slider de tamaño + alineación
+3. Escribís un texto, elegís opciones, apretás "Generar"
 4. Se genera un carrusel de N slides en output/AAAAMMDD_HHMMSS/
 5. Se muestra la ruta de la carpeta generada
 

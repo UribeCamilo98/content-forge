@@ -1,7 +1,8 @@
 from PIL import ImageFont, ImageDraw, Image
 
-def ajustar_tamano_fuente(texto, ancho_maximo, tamano_inicial=80):
-    ruta_fuente = "C:/Windows/Fonts/arial.ttf"
+def ajustar_tamano_fuente(texto, ancho_maximo, tamano_inicial=80, ruta_fuente = None):
+    if ruta_fuente is None:
+        ruta_fuente = "C:/Windows/Fonts/arial.ttf"
     tamano = tamano_inicial
     img_temp = Image.new("RGB", (1, 1))
     draw = ImageDraw.Draw(img_temp)

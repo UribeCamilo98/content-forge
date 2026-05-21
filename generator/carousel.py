@@ -5,9 +5,12 @@ from generator.base import PlantillaBase
 from config import RUTA_OUTPUT
 
 class Carrusel(PlantillaBase):
-    def __init__(self, textos, color_fondo, color_texto, num_slides=None):
+    def __init__(self, textos, color_fondo, color_texto, num_slides=None, fuente=None, tamano=None, alineacion="centro"):
         super().__init__(color_fondo,color_texto)
         self.textos = self._procesar_textos(textos,num_slides)
+        self.tamano = tamano
+        self.alineacion = alineacion
+        self.fuente = fuente
 
     def generar(self):
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
@@ -15,7 +18,7 @@ class Carrusel(PlantillaBase):
         os.makedirs(ruta_carpeta,exist_ok=True)
 
         for i, texto in enumerate(self.textos):
-            img = self._crear_imagen(texto)
+            img = self._crear_imagen(texto, self.fuente, self.tamano, self.alineacion)
             nombre = f"slide_{i+1:02d}.png"
             ruta = os.path.join(ruta_carpeta, nombre)
             img.save(ruta)

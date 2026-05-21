@@ -23,6 +23,25 @@
                 <option value="neon">Neon</option>
                 <option value="sabrina">Sabrina</option>
             </select>
+
+            <label for="fuente">Fuente:</label>
+            <select name="fuente" id="fuente">
+                <option value="">Predeterminada (Arial)</option>
+                {% for f in fuentes %}
+                <option value="{{ f }}">{{ f }}</option>
+                {% endfor %}
+            </select>
+
+            <label for="tamano">Tamaño: <span id="tamano-valor">80</span>px</label>
+            <input type="range" name="tamano" id="tamano" min="20" max="200" value="80">
+
+            <label>Alineación:</label>
+            <div class="radio-group">
+                <label><input type="radio" name="alineacion" value="izquierda"> Izquierda</label>
+                <label><input type="radio" name="alineacion" value="centro" checked> Centro</label>
+                <label><input type="radio" name="alineacion" value="derecha"> Derecha</label>
+            </div>
+
             <button type="submit">Generar</button>
         </form>
         {% if ruta %}
@@ -31,6 +50,12 @@
             <p>Ruta: <code>{{ ruta }}</code></p>
         </div>
         {% endif %}
+
     </div>
+     <script>
+        document.getElementById("tamano").addEventListener("input", function() {
+            document.getElementById("tamano-valor").textContent = this.value;
+        });
+        </script>
 </body>
 </html>
