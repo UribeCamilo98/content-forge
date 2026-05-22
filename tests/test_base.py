@@ -1,5 +1,5 @@
 from generator.base import PlantillaBase
-from config import ANCHO, ALTO
+from config import PRESETS_TAMANO
 from PIL import Image
 
 def test_crear_imagen_retorna_pil_image():
@@ -9,7 +9,7 @@ def test_crear_imagen_retorna_pil_image():
 def test_crear_imagen_tamano_correcto():
     pb = PlantillaBase((255, 255, 255), (0, 0, 0))
     img = pb._crear_imagen("Hola")
-    assert img.size == (ANCHO, ALTO)
+    assert img.size == (PRESETS_TAMANO["cuadrado"])
 def test_crear_imagen_fondo_correcto():
     pb = PlantillaBase((255, 0, 0), (0, 0, 0))
     img = pb._crear_imagen("Hola")

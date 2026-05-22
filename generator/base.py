@@ -1,5 +1,5 @@
 from PIL import Image, ImageDraw
-from config import ANCHO, ALTO, MARGEN
+from config import PRESETS_TAMANO, MARGEN
 from utils.typography import ajustar_tamano_fuente, dividir_texto
 from utils.fonts import font_manager
 
@@ -8,13 +8,15 @@ class PlantillaBase:
         self.color_fondo = color_fondo
         self.color_texto = color_texto
 
-    def _crear_imagen(self, texto, fuente = None, tamano = None, alineacion = "centro"):
-        img = Image.new("RGB", (ANCHO, ALTO), self.color_fondo)
+    def _crear_imagen(self, texto, fuente = None, tamano = None, alineacion = "centro", ancho=None, alto=None):
+        if ancho == None and alto == None:
+            ancho,alto = PRESETS_TAMANO["cuadrado"]
+        img = Image.new("RGB", (ancho, alto), self.color_fondo)
         draw = ImageDraw.Draw(img)
 
         lineas = dividir_texto(texto)
         linea_mas_larga = max(lineas, key=len)
-        ancho_disponible = ANCHO - MARGEN*2
+        ancho_disponible = ancho - MARGEN*2
 
         if fuente and fuente in font_manager.listar_fuentes():
             ruta_fuente = font_manager.obtener_ruta(fuente)
@@ -29,7 +31,7 @@ class PlantillaBase:
                 bbox = draw.textbbox((0, 0), linea_mas_larga, font=fuente_pil)
                 ancho_necesario = bbox[2] - bbox[0]
                 alto_necesario = len(lineas) * tamano_fuente
-                if ancho_necesario <= ancho_disponible and alto_necesario <= ALTO:
+                if ancho_necesario <= ancho_disponible and alto_necesario <= alto:
                     break
                 tamano_fuente -= 2
                 if tamano_fuente < 12:
@@ -41,7 +43,7 @@ class PlantillaBase:
 
 
         alto_total = len(lineas) * tamano_fuente
-        y_inicial = (ALTO - alto_total)//2
+        y_inicial = (alto - alto_total)//2
 
         for i, linea in enumerate(lineas):
             bbox= draw.textbbox((0, 0), linea, font=fuente_pil)
@@ -50,9 +52,9 @@ class PlantillaBase:
             if alineacion == "izquierda":
                 x = MARGEN
             elif alineacion == "derecha":
-                x = ANCHO - MARGEN - ancho_linea
+                x = ancho - MARGEN - ancho_linea
             else:
-                x = (ANCHO - ancho_linea) // 2
+                x = (ancho - ancho_linea) // 2
 
             y = y_inicial + i * tamano_fuente
             draw.text((x,y), linea, font=fuente_pil, fill=self.color_texto)
