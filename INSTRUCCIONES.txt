@@ -33,6 +33,7 @@ contentforge/
 │   ├── __init__.py
 │   ├── colors.py           # Paletas de colores predefinidas
 │   ├── fonts.py            # Escáner y selector de fuentes ✅
+│   ├── images.py           # ⬅️ PENDIENTE — Gestión de imágenes de fondo
 │   └── typography.py       # Manejo de fuentes y textos
 │
 ├── templates/              # HTML (Flask los usa para la web)
@@ -40,7 +41,7 @@ contentforge/
 │
 ├── static/                 # CSS/JS para la interfaz web
 │   ├── style.css           # Estilos del formulario ✅
-│   └── script.js           # ⬅️ PENDIENTE
+│   └── script.js           # ⬅️ PENDIENTE — Preview vía AJAX
 │
 ├── tests/                  # Tests unitarios (pytest) ✅
 │   ├── test_base.py        ✅
@@ -60,40 +61,54 @@ PRINCIPIO MODULAR
 - Cada archivo tiene UNA sola responsabilidad.
 - PlantillaBase = motor de dibujo puro. Crea imagen + dibuja texto con
   fuente, tamaño y alineación configurables. No sabe de archivos ni carpetas.
-  Método público: _crear_imagen(texto, fuente, tamano, alineacion) → retorna PIL.Image
+  Método público: crear_imagen(texto, fuente, tamano, alineacion,
+  contorno, sombra) → retorna PIL.Image
 - Carrusel = clase principal. Hereda de PlantillaBase.
   __init__ procesa texto crudo → lista de slides.
-  generar() crea carpeta, llama _crear_imagen() por cada slide, guarda.
-  Recibe y pasa parámetros de fuente, tamaño y alineación.
+  generar() crea carpeta, llama crear_imagen() por cada slide, guarda.
+  Recibe y pasa parámetros de fuente, tamaño, alineación, contorno, sombra.
 - Carrusel maneja N slides (1-20), cubre casos de quote/anuncio.
 - FontManager = escanea fonts/ y provee lista de fuentes disponibles. ✅
 - ImageManager = administra sets de imágenes en images/.
 - LayoutEngine = aplica plantillas predefinidas (texto+imágenes).
   Método público: aplicar(texto, imagenes, template) → dict de posiciones
-- VisualEditor (v1.2) = canvas JS en frontend para edición en vivo.
+- VisualEditor (v1.4) = canvas JS en frontend para edición en vivo.
 - Output simple: cada generación crea su carpeta con timestamp dentro de output/.
+- Preview vía AJAX: ruta /preview devuelve la imagen renderizada en memoria
+  (sin guardar) para mostrarla en el navegador antes de generar el carrusel.
 
 
 ROADMAP DE VERSIONES
 --------------------
-v1.0 (Texto avanzado)
+v1.0 (Texto avanzado)                           ✅ COMPLETADA
   - Fuentes externas + selector
   - Tamaño de fuente manual
   - Alineación (izquierda, centro, derecha, justificado)
   - Presets de tamaño de slide (cuadrado, vertical, horizontal)
   - Cantidad de slides manual
 
-v1.1 (Imágenes + layouts automáticos)
-  - Upload de imágenes + organización en sets
-  - Layouts predefinidos (texto izq/dcha/centro, collage alrededor)
-  - Generación automática de collages con imágenes del set
-  - Ajuste manual de posición/tamaño de imágenes
+v1.1 (Mejoras tipográficas + preview)            ⬅️ SIGUIENTE
+  - Bordes y sombreado en texto
+  - Selector de color interactivo (color picker hex)
+  - Preview vía AJAX: renderizar y mostrar imagen
+    en el navegador sin recargar ni guardar
 
-v1.2 (Editor visual)
+v1.2 (Imagen de fondo)                           ⬅️ DESPUÉS
+  - Fondo del slide: imagen en vez de color sólido
+  - Upload y selector de imágenes de fondo
+  - Preview actualizado con el fondo
+
+v1.3 (Imágenes encima + layouts)                 ⬅️ ORIGINAL v1.1
+  - Upload de imágenes + organización en sets
+  - Layouts predefinidos (texto izq/dcha/centro,
+    collage alrededor)
+  - Ajuste manual de posición/tamaño de imágenes
+  - Preview con imágenes visibles
+
+v1.4 (Editor visual completo)                    🔮 FUTURO
   - Canvas en vivo en el navegador
-  - Gestión de capas completa
-  - Arrastrar, soltar, redimensionar elementos
-  - Galería de imágenes precargadas
+  - Capas, arrastrar, soltar, redimensionar
+  - Preview en tiempo real (sin llamada al servidor)
 
 
 DÍA 1: Setup + Flask "Hola Mundo" ✅ COMPLETADO
@@ -140,38 +155,77 @@ DÍA 5: Texto avanzado — Fuentes y tipografía (v1.0) ✅ COMPLETADO
   - app.py: lee nuevos campos y los pasa al Carrusel ✅
   - tests/test_fonts.py: tests unitarios para FontManager ✅
 
-DÍA 6: Presets de tamaño y slides manuales (v1.0) ⬅️ SIGUIENTE
-  - config.py: agregar PRESETS_TAMANO (1080×1080, 1080×1920, 1920×1080)
-  - carousel.py: recibir num_slides y tamaño desde el formulario
-  - index.html: selector de preset de tamaño, input de cantidad de slides
-  - CSS responsivo para los nuevos controles
+DÍA 6: Presets de tamaño y slides manuales (v1.0) ✅ COMPLETADO
+  - config.py: agregar PRESETS_TAMANO (1080×1080, 1080×1920, 1920×1080) ✅
+  - carousel.py: recibir num_slides y tamaño desde el formulario ✅
+  - index.html: selector de preset de tamaño, input de cantidad de slides ✅
+  - CSS responsivo para los nuevos controles ✅
 
-DÍA 7: Imágenes de fondo + layouts (v1.1)
-  - Crear images/ con sets de ejemplo
-  - utils/images.py: manejo de colecciones de imágenes
-  - base.py: dibujar imagen de fondo + texto encima
-  - Layouts predefinidos (texto-izquierda, texto-derecha, texto-centro)
-  - index.html: selector de set de imágenes, uploader de imágenes
-  - app.py: rutas /upload y /images para servir imágenes
+DÍA 7: Bordes y sombreado en texto (v1.1) ⬅️ SIGUIENTE
+  - base.py: agregar parámetros contorno (color/grosor) y sombra (offset/color) a crear_imagen
+  - Dibujar sombra primero (desplazada), luego contorno (texto outline), luego texto
+  - index.html: controles para activar contorno (color + grosor) y sombra (offset + color)
+  - app.py: leer nuevos campos y pasarlos a Carrusel
+  - Tests: test_base.py actualizado para contorno y sombra
 
-DÍA 8+: Collages automáticos + ajuste manual (v1.1)
-  - LayoutEngine: distribuir imágenes automáticamente en collage
-  - Layouts alrededor del texto
-  - Ajuste de posición/tamaño desde frontend
+DÍA 8: Selector de color interactivo (v1.1)
+  - index.html: reemplazar selector de paletas fijas por inputs de color (type="color")
+    para color de fondo y color de texto
+  - Mantener paletas predefinidas como botones de acceso rápido que seteen los color pickers
+  - app.py: recibir colores hex desde el formulario
+  - colors.py: simplificar (las paletas pasan a ser valores por defecto/atajos)
+  - Tests: test_colors.py actualizado
 
-v1.2 (Futuro): Editor visual con canvas en vivo
+DÍA 9: Preview vía AJAX (v1.1)
+  - app.py: nueva ruta `/preview` (POST) que recibe los mismos parámetros que /generar
+    pero renderiza UN solo slide en memoria y devuelve la imagen PNG en la respuesta
+    (sin guardar en output/)
+  - static/script.js: función que captura el formulario, envía POST a /preview vía
+    fetch, y muestra la imagen resultante en un <img> dentro de la página
+  - index.html: área de preview (img) que se actualiza al cambiar cualquier control;
+    botón "Generar" separado que sí guarda el carrusel completo
+  - El preview muestra el primer slide como referencia visual
+
+DÍA 10: Imagen de fondo (v1.2)
+  - utils/images.py: ImageManager — escanea images/ y provee lista de imágenes disponibles,
+    carga y redimensiona imágenes para usarlas como fondo
+  - base.py: crear_imagen acepta ruta_imagen_fondo opcional; si se provee, la dibuja como
+    capa base en vez del color sólido, y el texto va encima
+  - index.html: selector de imagen de fondo (radio buttons o dropdown con las imágenes
+    disponibles en images/)
+  - app.py: rutas /upload-fondo (POST para subir imágenes de fondo) y pasar ruta_imagen_fondo
+    al Carrusel
+  - Preview AJAX actualizado para reflejar el fondo
+
+DÍA 11+: Layouts con imágenes encima (v1.3)
+  - utils/layouts.py: LayoutEngine — aplicar plantillas predefinidas
+    (texto-izquierda, texto-derecha, texto-centro, collage)
+  - base.py: componer imagen final: fondo (color o imagen) + imágenes del layout + texto
+  - index.html: selector de layout, uploader de imágenes, organización en sets
+  - app.py: rutas /upload y /images para servir imágenes de los sets
+  - Preview actualizado con imágenes y layout visibles
+
+v1.4 (Futuro): Editor visual con canvas en vivo
   - Gestión de capas completa
   - Arrastrar, soltar, redimensionar en navegador
   - Preview en tiempo real
 
 
-MVP ACTUAL (Días 1-5)
---------------------
+MVP v1.0 ✅ COMPLETADO
+-----------------
 1. Abrís http://localhost:5000
 2. Ves un formulario con textarea + selector de paletas + selector de fuente + slider de tamaño + alineación
 3. Escribís un texto, elegís opciones, apretás "Generar"
 4. Se genera un carrusel de N slides en output/AAAAMMDD_HHMMSS/
 5. Se muestra la ruta de la carpeta generada
+
+MVP v1.1 (PRÓXIMO)
+-----------------
+1. Abrís http://localhost:5000
+2. Ves un formulario con textarea + color pickers + selector de fuente + slider de tamaño + alineación + controles de borde/sombra
+3. Escribís texto, elegís opciones, ves el preview en vivo del slide
+4. Cuando te gusta, apretás "Generar"
+5. Se guarda el carrusel completo en output/AAAAMMDD_HHMMSS/
 
 
 PRUEBAS UNITARIAS
