@@ -172,7 +172,7 @@ DÍA 7: Bordes y sombreado en texto (v1.1) ✅ COMPLETADO
     Borde, Sombra, Slide) con checkbox show/hide vía CSS ✅
   - index.html: controles de borde (color picker + range grosor) y sombra
     (color picker + range offset X/Y) ✅
-  - Tests: test_base.py actualizado para contorno y sombra ⬅️ PENDIENTE
+  - Tests: test_base.py actualizado para contorno y sombra ✅
   - Fix: test_fonts.py — assert len(fuentes) == 3 → len(fuentes) > 0 ✅
 
 DÍA 8: Selector de color interactivo (v1.1) ⬅️ SIGUIENTE
