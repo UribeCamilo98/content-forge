@@ -87,10 +87,10 @@ v1.0 (Texto avanzado)                           ✅ COMPLETADA
   - Presets de tamaño de slide (cuadrado, vertical, horizontal)
   - Cantidad de slides manual
 
-v1.1 (Mejoras tipográficas + preview)            ⬅️ SIGUIENTE
-  - Bordes y sombreado en texto
-  - Selector de color interactivo (color picker hex)
-  - Preview vía AJAX: renderizar y mostrar imagen
+v1.1 (Mejoras tipográficas + preview)            ⬅️ EN PROGRESO (Día 7 ✅)
+  - Bordes y sombreado en texto                          ✅
+  - Selector de color interactivo (color picker hex)     ⬅️ Día 8
+  - Preview vía AJAX: renderizar y mostrar imagen        ⬅️ Día 9
     en el navegador sin recargar ni guardar
 
 v1.2 (Imagen de fondo)                           ⬅️ DESPUÉS
@@ -161,14 +161,21 @@ DÍA 6: Presets de tamaño y slides manuales (v1.0) ✅ COMPLETADO
   - index.html: selector de preset de tamaño, input de cantidad de slides ✅
   - CSS responsivo para los nuevos controles ✅
 
-DÍA 7: Bordes y sombreado en texto (v1.1) ⬅️ SIGUIENTE
-  - base.py: agregar parámetros contorno (color/grosor) y sombra (offset/color) a crear_imagen
-  - Dibujar sombra primero (desplazada), luego contorno (texto outline), luego texto
-  - index.html: controles para activar contorno (color + grosor) y sombra (offset + color)
-  - app.py: leer nuevos campos y pasarlos a Carrusel
-  - Tests: test_base.py actualizado para contorno y sombra
+DÍA 7: Bordes y sombreado en texto (v1.1) ✅ COMPLETADO
+  - base.py: agregar parámetros contorno (color/grosor) y sombra (offset/color) a crear_imagen ✅
+  - Dibujar sombra primero (desplazada), luego contorno (texto outline), luego texto ✅
+  - carousel.py: pasar nuevos parámetros en __init__ y generar() ✅
+  - app.py: función hex_a_rgb() para convertir hex a tupla RGB ✅
+  - app.py: leer borde_activar, borde_color, borde_grosor, sombra_activar,
+    sombra_offset_x, sombra_offset_y, sombra_color y pasarlos a Carrusel ✅
+  - index.html: reorganizar formulario en 6 fieldset (Texto, Tipografía, Color,
+    Borde, Sombra, Slide) con checkbox show/hide vía CSS ✅
+  - index.html: controles de borde (color picker + range grosor) y sombra
+    (color picker + range offset X/Y) ✅
+  - Tests: test_base.py actualizado para contorno y sombra ⬅️ PENDIENTE
+  - Fix: test_fonts.py — assert len(fuentes) == 3 → len(fuentes) > 0 ✅
 
-DÍA 8: Selector de color interactivo (v1.1)
+DÍA 8: Selector de color interactivo (v1.1) ⬅️ SIGUIENTE
   - index.html: reemplazar selector de paletas fijas por inputs de color (type="color")
     para color de fondo y color de texto
   - Mantener paletas predefinidas como botones de acceso rápido que seteen los color pickers
@@ -219,13 +226,14 @@ MVP v1.0 ✅ COMPLETADO
 4. Se genera un carrusel de N slides en output/AAAAMMDD_HHMMSS/
 5. Se muestra la ruta de la carpeta generada
 
-MVP v1.1 (PRÓXIMO)
------------------
+MVP v1.1 (PRÓXIMO — Día 7 ✅)
+----------------------------
 1. Abrís http://localhost:5000
-2. Ves un formulario con textarea + color pickers + selector de fuente + slider de tamaño + alineación + controles de borde/sombra
-3. Escribís texto, elegís opciones, ves el preview en vivo del slide
-4. Cuando te gusta, apretás "Generar"
+2. Ves un formulario organizado en secciones (Texto, Tipografía, Color, Borde, Sombra, Slide)
+3. Escribís texto, elegís opciones, activás borde y/o sombra si querés
+4. Apretás "Generar"
 5. Se guarda el carrusel completo en output/AAAAMMDD_HHMMSS/
+6. Pendiente: color pickers + preview AJAX
 
 
 PRUEBAS UNITARIAS

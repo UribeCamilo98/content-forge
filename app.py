@@ -4,6 +4,13 @@ from utils.colors import obtener_paleta
 from utils.fonts import font_manager
 from config import PRESETS_TAMANO, TAMANO_OPCIONES
 
+def hex_a_rgb(h):
+    h = h.lstrip("#")
+    return tuple(
+        int(h[i:i+2], 16)
+        for i in (0, 2, 4)
+    )
+
 app = Flask(__name__)
 @app.route("/")
 def home():
@@ -26,7 +33,29 @@ def generar():
     num_slides_str = request.form.get("num_slides", "")
     num_slides = int(num_slides_str) if num_slides_str else None
 
-    plantilla = Carrusel(texto, paleta["fondo"], paleta["texto"], fuente=fuente, num_slides=num_slides, tamano=tamano, alineacion=alineacion, ancho=ancho, alto=alto)
+    borde_activar= request.form.get("borde_activar")
+    if borde_activar:
+        contorno_color = hex_a_rgb(request.form.get("borde_color", "#000000"))
+        contorno_grosor = int(request.form.get("borde_grosor", 3))
+    else:
+        contorno_color = None
+        contorno_grosor= 3
+
+    sombra_activar = request.form.get("sombra_activar")
+    if sombra_activar:
+        sx = int(request.form.get("sombra_offset_x", 5))
+        sy = int(request.form.get("sombra_offset_y", 5))
+        sombra_offset = (sx, sy)
+        sombra_color = hex_a_rgb(request.form.get("sombra_color", "#808080"))
+    else:
+        sombra_offset = None
+        sombra_color = (128, 128, 128)
+
+    plantilla = Carrusel(texto, paleta["fondo"], paleta["texto"], fuente=fuente, 
+                         num_slides=num_slides, tamano=tamano, alineacion=alineacion, 
+                         ancho=ancho, alto=alto, contorno_color=contorno_color,
+                         contorno_grosor=contorno_grosor, sombra_offset=sombra_offset,
+                         sombra_color=sombra_color)
     ruta = plantilla.generar()
 
     return render_template("index.html", ruta = ruta, fuentes=font_manager.listar_fuentes(), tamano_opciones=TAMANO_OPCIONES)

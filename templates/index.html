@@ -1,68 +1,124 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ContentForge</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
+
 <body>
     <div class="container">
         <h1>ContentForge</h1>
         <p>Generador de carruseles</p>
+
         <form action="/generar" method="POST">
-            <label for="texto">Texto del carrusel:</label>
-            <textarea name="texto" id="texto" rows="10" placeholder="Escribí tu texto aquí..." required></textarea>
-            <label for="paleta">Paleta de colores:</label>
-            <select name="paleta" id="paleta">
-                <option value="oscuro">Oscuro</option>
-                <option value="claro">Claro</option>
-                <option value="vibrante">Vibrante</option>
-                <option value="naturaleza">Naturaleza</option>
-                <option value="pastel">Pastel</option>
-                <option value="neon">Neon</option>
-                <option value="sabrina">Sabrina</option>
-            </select>
-
-            <label for="fuente">Fuente:</label>
-            <select name="fuente" id="fuente">
-                <option value="">Predeterminada (Arial)</option>
-                {% for f in fuentes %}
-                <option value="{{ f }}">{{ f }}</option>
-                {% endfor %}
-            </select>
-
-           <label for="tamano">Tamaño de fuente (px):</label>
-            <select name="tamano" id="tamano">
-                {% for v in tamano_opciones %}
-                <option value="{{ v }}" {% if v == 80 %}selected{% endif %}>{{ v }}px</option>
-                {% endfor %}
-            </select>
-
-            <label for="preset_tamano">Tamaño de slide:</label>
-            <select name="preset_tamano" id="preset_tamano">
-                <option value="cuadrado">Cuadrado (1080×1080)</option>
-                <option value="vertical">Vertical (1080×1920)</option>
-                <option value="horizontal">Horizontal (1920×1080)</option>
-            </select>
-
-            <label for="num_slides">Cantidad de slides:</label>
-                <select name="num_slides" id="num_slides">
-                    <option value="">Auto</option>
-                    {% for n in range(1, 21) %}
-                    <option value="{{ n }}">{{ n }}</option>
-                    {% endfor %}
-                </select>
-
-            <label>Alineación:</label>
-            <div class="radio-group">
-                <label><input type="radio" name="alineacion" value="izquierda"> Izquierda</label>
-                <label><input type="radio" name="alineacion" value="centro" checked> Centro</label>
-                <label><input type="radio" name="alineacion" value="derecha"> Derecha</label>
-            </div>
-
+            <!-- ===== 1. TEXTO ===== -->
+            <fieldset>
+                <legend>📝 Texto</legend>
+                <textarea name="texto" id="texto" rows="10" placeholder="Escribí tu texto aquí..." required></textarea>
+            </fieldset>
+            <!-- ===== 2. TIPOGRAFÍA ===== -->
+            <fieldset>
+                <legend>🔤 Tipografía</legend>
+                <label>Fuente:
+                    <select name="fuente">
+                        <option value="">Predeterminada (Arial)</option>
+                        {% for f in fuentes %}
+                        <option value="{{ f }}">{{ f }}</option>
+                        {% endfor %}
+                    </select>
+                </label>
+                <label>Tamaño:
+                    <select name="tamano">
+                        {% for v in tamano_opciones %}
+                        <option value="{{ v }}" {% if v==80 %}selected{% endif %}>{{ v }}px</option>
+                        {% endfor %}
+                    </select>
+                </label>
+                <label>Alineación:</label>
+                <div class="radio-group">
+                    <label><input type="radio" name="alineacion" value="izquierda"> Izquierda</label>
+                    <label><input type="radio" name="alineacion" value="centro" checked> Centro</label>
+                    <label><input type="radio" name="alineacion" value="derecha"> Derecha</label>
+                </div>
+            </fieldset>
+            <!-- ===== 3. COLOR ===== -->
+            <fieldset>
+                <legend>🎨 Color</legend>
+                <label>Paleta de colores:
+                    <select name="paleta">
+                        <option value="oscuro">Oscuro</option>
+                        <option value="claro">Claro</option>
+                        <option value="violeta">Violeta</option>
+                        <option value="naturaleza">Naturaleza</option>
+                        <option value="pastel">Pastel</option>
+                        <option value="neon">Neon</option>
+                        <option value="sabrina">Sabrina</option>
+                    </select>
+                </label>
+            </fieldset>
+            <!-- ===== 4. BORDE ===== -->
+            <fieldset>
+                <legend>✏️ Borde</legend>
+                <label>
+                    <input type="checkbox" name="borde_activar" id="borde_activar">
+                    Activar borde en el texto
+                </label>
+                <div class="opciones-dependientes">
+                    <label>Color del borde:
+                        <input type="color" name="borde_color" value="#000000">
+                    </label>
+                    <label>Grosor:
+                        <input type="range" name="borde_grosor" min="1" max="10" value="3">
+                        <span id="borde_grosor_val">3px</span>
+                    </label>
+                </div>
+            </fieldset>
+            <!-- ===== 5. SOMBRA ===== -->
+            <fieldset>
+                <legend>👤 Sombra</legend>
+                <label>
+                    <input type="checkbox" name="sombra_activar" id="sombra_activar">
+                    Activar sombra en el texto
+                </label>
+                <div class="opciones-dependientes">
+                    <label>Color de sombra:
+                        <input type="color" name="sombra_color" value="#808080">
+                    </label>
+                    <label>Offset X:
+                        <input type="range" name="sombra_offset_x" min="0" max="20" value="5">
+                        <span id="sombra_x_val">5px</span>
+                    </label>
+                    <label>Offset Y:
+                        <input type="range" name="sombra_offset_y" min="0" max="20" value="5">
+                        <span id="sombra_y_val">5px</span>
+                    </label>
+                </div>
+            </fieldset>
+            <!-- ===== 6. SLIDE ===== -->
+            <fieldset>
+                <legend>🖼️ Slide</legend>
+                <label>Tamaño:
+                    <select name="preset_tamano">
+                        <option value="cuadrado">Cuadrado (1080×1080)</option>
+                        <option value="vertical">Vertical (1080×1920)</option>
+                        <option value="horizontal">Horizontal (1920×1080)</option>
+                    </select>
+                </label>
+                <label>Cantidad de slides:
+                    <select name="num_slides">
+                        <option value="">Auto</option>
+                        {% for n in range(1, 21) %}
+                        <option value="{{ n }}">{{ n }}</option>
+                        {% endfor %}
+                    </select>
+                </label>
+            </fieldset>
             <button type="submit">Generar</button>
         </form>
+
         {% if ruta %}
         <div class="resultado">
             <h2>Carrusel generado</h2>
@@ -72,4 +128,5 @@
 
     </div>
 </body>
+
 </html>

@@ -8,7 +8,8 @@ class PlantillaBase:
         self.color_fondo = color_fondo
         self.color_texto = color_texto
 
-    def _crear_imagen(self, texto, fuente = None, tamano = None, alineacion = "centro", ancho=None, alto=None):
+    def _crear_imagen(self, texto, fuente = None, tamano = None, alineacion = "centro", ancho=None, 
+                      alto=None, contorno_color=None, contorno_grosor=3, sombra_offset=None, sombra_color=(128, 128, 128)):
         if ancho == None and alto == None:
             ancho,alto = PRESETS_TAMANO["cuadrado"]
         img = Image.new("RGB", (ancho, alto), self.color_fondo)
@@ -57,6 +58,17 @@ class PlantillaBase:
                 x = (ancho - ancho_linea) // 2
 
             y = y_inicial + i * tamano_fuente
+
+            if sombra_offset:
+                sx, sy= sombra_offset
+                draw.text((x + sx, y + sy), linea, font=fuente_pil, fill=sombra_color)
+
+            if contorno_color:
+                for dx, dy in [(-1,-1), (0,-1), (1,-1),
+                           (-1,0), (1,0),
+                           (-1,1), (0,1), (1,1)]:
+                    draw.text((x + dx * contorno_grosor, y + dy * contorno_grosor), linea, font=fuente_pil, fill=contorno_color)
+
             draw.text((x,y), linea, font=fuente_pil, fill=self.color_texto)
         
         return img
