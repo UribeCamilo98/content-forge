@@ -41,7 +41,7 @@ contentforge/
 │
 ├── static/                 # CSS/JS para la interfaz web
 │   ├── style.css           # Estilos del formulario ✅
-│   └── script.js           # ⬅️ PENDIENTE — Preview vía AJAX
+│   └── script.js           # Sincronización paleta ↔ color picker ✅
 │
 ├── tests/                  # Tests unitarios (pytest) ✅
 │   ├── test_base.py        ✅
@@ -87,9 +87,9 @@ v1.0 (Texto avanzado)                           ✅ COMPLETADA
   - Presets de tamaño de slide (cuadrado, vertical, horizontal)
   - Cantidad de slides manual
 
-v1.1 (Mejoras tipográficas + preview)            ⬅️ EN PROGRESO (Día 7 ✅)
+v1.1 (Mejoras tipográficas + preview)            ⬅️ EN PROGRESO (Días 7 ✅, 8 ✅)
   - Bordes y sombreado en texto                          ✅
-  - Selector de color interactivo (color picker hex)     ⬅️ Día 8
+  - Selector de color interactivo (color picker hex)     ✅
   - Preview vía AJAX: renderizar y mostrar imagen        ⬅️ Día 9
     en el navegador sin recargar ni guardar
 
@@ -175,13 +175,14 @@ DÍA 7: Bordes y sombreado en texto (v1.1) ✅ COMPLETADO
   - Tests: test_base.py actualizado para contorno y sombra ✅
   - Fix: test_fonts.py — assert len(fuentes) == 3 → len(fuentes) > 0 ✅
 
-DÍA 8: Selector de color interactivo (v1.1) ⬅️ SIGUIENTE
-  - index.html: reemplazar selector de paletas fijas por inputs de color (type="color")
-    para color de fondo y color de texto
-  - Mantener paletas predefinidas como botones de acceso rápido que seteen los color pickers
-  - app.py: recibir colores hex desde el formulario
-  - colors.py: simplificar (las paletas pasan a ser valores por defecto/atajos)
-  - Tests: test_colors.py actualizado
+DÍA 8: Selector de color interactivo (v1.1) ✅ COMPLETADO
+  - colors.py: valores RGB → hex para compatibilidad con el navegador ✅
+  - index.html: color pickers (type="color") para fondo y texto, más el select de
+    paletas predefinidas que sincronizan los pickers vía data-* attributes ✅
+  - app.py: recibe hex del form, prioriza color pickers, fallback a paleta ✅
+  - static/script.js: sincronización paleta ↔ color picker en tiempo real ✅
+  - static/style.css: estilos para inputs color ✅
+  - Tests: test_colors.py actualizado con valores hex ✅
 
 DÍA 9: Preview vía AJAX (v1.1)
   - app.py: nueva ruta `/preview` (POST) que recibe los mismos parámetros que /generar
@@ -233,7 +234,7 @@ MVP v1.1 (PRÓXIMO — Día 7 ✅)
 3. Escribís texto, elegís opciones, activás borde y/o sombra si querés
 4. Apretás "Generar"
 5. Se guarda el carrusel completo en output/AAAAMMDD_HHMMSS/
-6. Pendiente: color pickers + preview AJAX
+  6. Pendiente: preview AJAX (Día 9)
 
 
 PRUEBAS UNITARIAS

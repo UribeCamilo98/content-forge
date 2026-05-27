@@ -1,11 +1,11 @@
 PALETAS = {
-    "oscuro": {"fondo": (25, 25, 35), "texto": (255, 255, 255)},
-    "claro": {"fondo": (245, 245, 245), "texto": (30, 30, 30)},
-    "naturaleza": {"fondo": (34, 139, 34), "texto": (255, 255, 255)},
-    "pastel": {"fondo": (255, 182, 193), "texto": (80, 40, 60)},
-    "neon": {"fondo": (0, 0, 0), "texto": (57, 255, 20)},
-    "sabrina":{"fondo":(242, 233, 216), "texto":(140, 92, 50)},
-    "violeta":{"fondo":(36, 41, 76), "texto":(155, 147, 250)}
+    "oscuro": {"fondo": "#191923", "texto": "#ffffff"},
+    "claro": {"fondo": "#f5f5f5", "texto": "#1e1e1e"},
+    "naturaleza": {"fondo": "#228b22", "texto": "#ffffff"},
+    "pastel": {"fondo": "#ffb6c1", "texto": "#50283c"},
+    "neon": {"fondo": "#000000", "texto": "#39ff14"},
+    "sabrina":{"fondo":"#f2e9d8", "texto":"#8c5c32"},
+    "violeta":{"fondo":"#24294c", "texto":"#9b93fa"}
 }
 
 def obtener_paleta(nombre):

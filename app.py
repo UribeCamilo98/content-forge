@@ -1,6 +1,6 @@
 from flask import Flask, render_template, request
 from generator.carousel import Carrusel
-from utils.colors import obtener_paleta
+from utils.colors import obtener_paleta, PALETAS
 from utils.fonts import font_manager
 from config import PRESETS_TAMANO, TAMANO_OPCIONES
 
@@ -15,13 +15,22 @@ app = Flask(__name__)
 @app.route("/")
 def home():
     fuentes = font_manager.listar_fuentes()
-    return render_template("index.html", fuentes=fuentes, tamano_opciones=TAMANO_OPCIONES)
+    return render_template("index.html", fuentes=fuentes, tamano_opciones=TAMANO_OPCIONES, paletas=PALETAS)
 
 @app.route("/generar", methods=["POST"])
 def generar():
     texto = request.form["texto"]
-    nombre_paleta = request.form.get("paleta", "oscuro")
-    paleta = obtener_paleta(nombre_paleta)
+    color_fondo_hex = request.form.get("color_fondo", "")
+    color_texto_hex = request.form.get("color_texto", "")
+
+    if not color_fondo_hex or not color_texto_hex:
+        nombre_paleta = request.form.get("paleta", "oscuro")
+        paleta = obtener_paleta(nombre_paleta)
+        color_fondo_hex = paleta["fondo"]
+        color_texto_hex = paleta["texto"]
+
+    color_fondo = hex_a_rgb(color_fondo_hex)
+    color_texto = hex_a_rgb(color_texto_hex)
 
     fuente = request.form.get("fuente", "")
     tamano_str = request.form.get("tamano", "")
@@ -51,14 +60,15 @@ def generar():
         sombra_offset = None
         sombra_color = (128, 128, 128)
 
-    plantilla = Carrusel(texto, paleta["fondo"], paleta["texto"], fuente=fuente, 
+    plantilla = Carrusel(texto, color_fondo, color_texto, fuente=fuente, 
                          num_slides=num_slides, tamano=tamano, alineacion=alineacion, 
                          ancho=ancho, alto=alto, contorno_color=contorno_color,
                          contorno_grosor=contorno_grosor, sombra_offset=sombra_offset,
                          sombra_color=sombra_color)
     ruta = plantilla.generar()
 
-    return render_template("index.html", ruta = ruta, fuentes=font_manager.listar_fuentes(), tamano_opciones=TAMANO_OPCIONES)
+    return render_template("index.html", ruta = ruta, fuentes=font_manager.listar_fuentes(), 
+                           tamano_opciones=TAMANO_OPCIONES, paletas=PALETAS)
 
 if __name__ == "__main__":
     app.run(debug=True)

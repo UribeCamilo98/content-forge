@@ -8,8 +8,8 @@ def test_obtener_paleta_conocida_devuelve_dict_con_claves():
 
 def test_obtener_paleta_conocida_devuelve_valores_correctos():
     paleta = obtener_paleta("oscuro")
-    assert paleta["fondo"] == (25, 25, 35)
-    assert paleta["texto"] == (255, 255, 255)
+    assert paleta["fondo"] == "#191923"
+    assert paleta["texto"] == "#ffffff"
 
 def test_obtener_paleta_desconocida_devuelve_oscuro():
     paleta = obtener_paleta("no_existe")

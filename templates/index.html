@@ -48,15 +48,19 @@
             <fieldset>
                 <legend>🎨 Color</legend>
                 <label>Paleta de colores:
-                    <select name="paleta">
-                        <option value="oscuro">Oscuro</option>
-                        <option value="claro">Claro</option>
-                        <option value="violeta">Violeta</option>
-                        <option value="naturaleza">Naturaleza</option>
-                        <option value="pastel">Pastel</option>
-                        <option value="neon">Neon</option>
-                        <option value="sabrina">Sabrina</option>
+                    <select name="paleta" id="paleta-select">
+                        <option value="">— Personalizado —</option>
+                        {% for nombre, colores in paletas.items() %}
+                        <option value="{{ nombre }}" data-fondo="{{ colores.fondo }}" data-texto="{{ colores.texto }}"
+                            {% if nombre=='oscuro' %}selected{% endif %}>{{ nombre | capitalize }}</option>
+                        {% endfor %}
                     </select>
+                    <label>Color de fondo:
+                        <input type="color" name="color_fondo" value="#191923">
+                    </label>
+                    <label>Color de texto:
+                        <input type="color" name="color_texto" value="#ffffff">
+                    </label>
                 </label>
             </fieldset>
             <!-- ===== 4. BORDE ===== -->
@@ -124,6 +128,7 @@
         {% endif %}
 
     </div>
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
 </body>
 
 </html>

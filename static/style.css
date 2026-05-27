@@ -65,3 +65,13 @@ button:hover {
 .resultado code {
     word-break: break-all;
 }
+
+input[type="color"] {
+    width: 60px;
+    height: 40px;
+    padding: 2px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    cursor: pointer;
+    vertical-align: middle;
+}
