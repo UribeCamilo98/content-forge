@@ -20,6 +20,14 @@ class Carrusel(PlantillaBase):
         self.sombra_offset = sombra_offset
         self.sombra_color = sombra_color
 
+    def render_slide(self, indice=0):
+        if indice < 0 or indice >= len(self.textos):
+            indice = 0
+        texto = self.textos[indice]
+        return self._crear_imagen(texto, self.fuente,self.tamano, self.alineacion, self.ancho,
+                                  self.alto, self.contorno_color, self.contorno_grosor, self.sombra_offset,
+                                  self.sombra_color)
+
     def generar(self):
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
         ruta_carpeta = os.path.join(RUTA_OUTPUT, timestamp)
