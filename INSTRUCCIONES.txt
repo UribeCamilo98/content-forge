@@ -41,7 +41,7 @@ contentforge/
 │
 ├── static/                 # CSS/JS para la interfaz web
 │   ├── style.css           # Estilos del formulario ✅
-│   └── script.js           # ⬅️ PENDIENTE — Preview vía AJAX
+│   └── script.js           # Sincronización paleta ↔ color picker ✅
 │
 ├── tests/                  # Tests unitarios (pytest) ✅
 │   ├── test_base.py        ✅
@@ -87,10 +87,10 @@ v1.0 (Texto avanzado)                           ✅ COMPLETADA
   - Presets de tamaño de slide (cuadrado, vertical, horizontal)
   - Cantidad de slides manual
 
-v1.1 (Mejoras tipográficas + preview)            ⬅️ SIGUIENTE
-  - Bordes y sombreado en texto
-  - Selector de color interactivo (color picker hex)
-  - Preview vía AJAX: renderizar y mostrar imagen
+v1.1 (Mejoras tipográficas + preview)            ✅ COMPLETADA (Días 7 ✅, 8 ✅, 9 ✅)
+  - Bordes y sombreado en texto                          ✅
+  - Selector de color interactivo (color picker hex)     ✅
+  - Preview vía AJAX: renderizar y mostrar imagen        ✅
     en el navegador sin recargar ni guardar
 
 v1.2 (Imagen de fondo)                           ⬅️ DESPUÉS
@@ -161,30 +161,46 @@ DÍA 6: Presets de tamaño y slides manuales (v1.0) ✅ COMPLETADO
   - index.html: selector de preset de tamaño, input de cantidad de slides ✅
   - CSS responsivo para los nuevos controles ✅
 
-DÍA 7: Bordes y sombreado en texto (v1.1) ⬅️ SIGUIENTE
-  - base.py: agregar parámetros contorno (color/grosor) y sombra (offset/color) a crear_imagen
-  - Dibujar sombra primero (desplazada), luego contorno (texto outline), luego texto
-  - index.html: controles para activar contorno (color + grosor) y sombra (offset + color)
-  - app.py: leer nuevos campos y pasarlos a Carrusel
-  - Tests: test_base.py actualizado para contorno y sombra
+DÍA 7: Bordes y sombreado en texto (v1.1) ✅ COMPLETADO
+  - base.py: agregar parámetros contorno (color/grosor) y sombra (offset/color) a crear_imagen ✅
+  - Dibujar sombra primero (desplazada), luego contorno (texto outline), luego texto ✅
+  - carousel.py: pasar nuevos parámetros en __init__ y generar() ✅
+  - app.py: función hex_a_rgb() para convertir hex a tupla RGB ✅
+  - app.py: leer borde_activar, borde_color, borde_grosor, sombra_activar,
+    sombra_offset_x, sombra_offset_y, sombra_color y pasarlos a Carrusel ✅
+  - index.html: reorganizar formulario en 6 fieldset (Texto, Tipografía, Color,
+    Borde, Sombra, Slide) con checkbox show/hide vía CSS ✅
+  - index.html: controles de borde (color picker + range grosor) y sombra
+    (color picker + range offset X/Y) ✅
+  - Tests: test_base.py actualizado para contorno y sombra ✅
+  - Fix: test_fonts.py — assert len(fuentes) == 3 → len(fuentes) > 0 ✅
 
-DÍA 8: Selector de color interactivo (v1.1)
-  - index.html: reemplazar selector de paletas fijas por inputs de color (type="color")
-    para color de fondo y color de texto
-  - Mantener paletas predefinidas como botones de acceso rápido que seteen los color pickers
-  - app.py: recibir colores hex desde el formulario
-  - colors.py: simplificar (las paletas pasan a ser valores por defecto/atajos)
-  - Tests: test_colors.py actualizado
+DÍA 8: Selector de color interactivo (v1.1) ✅ COMPLETADO
+  - colors.py: valores RGB → hex para compatibilidad con el navegador ✅
+  - index.html: color pickers (type="color") para fondo y texto, más el select de
+    paletas predefinidas que sincronizan los pickers vía data-* attributes ✅
+  - app.py: recibe hex del form, prioriza color pickers, fallback a paleta ✅
+  - static/script.js: sincronización paleta ↔ color picker en tiempo real ✅
+  - static/style.css: estilos para inputs color ✅
+  - Tests: test_colors.py actualizado con valores hex ✅
 
-DÍA 9: Preview vía AJAX (v1.1)
-  - app.py: nueva ruta `/preview` (POST) que recibe los mismos parámetros que /generar
-    pero renderiza UN solo slide en memoria y devuelve la imagen PNG en la respuesta
-    (sin guardar en output/)
-  - static/script.js: función que captura el formulario, envía POST a /preview vía
-    fetch, y muestra la imagen resultante en un <img> dentro de la página
-  - index.html: área de preview (img) que se actualiza al cambiar cualquier control;
-    botón "Generar" separado que sí guarda el carrusel completo
-  - El preview muestra el primer slide como referencia visual
+DÍA 9: Preview vía AJAX — Layout y preparación (v1.1) ✅ COMPLETADO
+  - index.html: split layout con formulario a la izquierda y preview a la derecha ✅
+  - index.html: grids compactos (grid-2, grid-3) dentro de fieldsets ✅
+  - index.html: alineación "Justificado" agregada al radio group ✅
+  - index.html: área de preview (img) + navegación ◀ ▶ en columna derecha ✅
+  - index.html: botón "Generar Carrusel" fuera del form, en columna derecha ✅
+  - static/style.css: layout 2 columnas (flex), 500px form-col, preview-col flex 1 ✅
+  - static/style.css: grids, radio-group, fieldset compacto, labels reducidos ✅
+  - static/style.css: preview-container, nav-controls, btn-generar ✅
+  - app.py: ruta /preview (POST, renderiza 1 slide, devuelve PNG) ✅
+  - carousel.py: método render_slide() para preview individual ✅
+  - script.js: AJAX con fetch, debounce 300ms, navegación entre slides ✅
+  - script.js: header X-Total-Slides para contador correcto de slides ✅
+  
+  ⚠️ PENDIENTE: La alineación "Justificado" actualmente se comporta como "Centro".
+    Falta implementar en base.py el cálculo de espaciado entre palabras
+    para que el texto ocupe el ancho completo (v1.1.1 o v1.2).
 
 DÍA 10: Imagen de fondo (v1.2)
   - utils/images.py: ImageManager — escanea images/ y provee lista de imágenes disponibles,
@@ -219,13 +235,17 @@ MVP v1.0 ✅ COMPLETADO
 4. Se genera un carrusel de N slides en output/AAAAMMDD_HHMMSS/
 5. Se muestra la ruta de la carpeta generada
 
-MVP v1.1 (PRÓXIMO)
------------------
+MVP v1.1 (Días 7-9 ✅)
+---------------------------
 1. Abrís http://localhost:5000
-2. Ves un formulario con textarea + color pickers + selector de fuente + slider de tamaño + alineación + controles de borde/sombra
-3. Escribís texto, elegís opciones, ves el preview en vivo del slide
-4. Cuando te gusta, apretás "Generar"
-5. Se guarda el carrusel completo en output/AAAAMMDD_HHMMSS/
+2. Ves split layout: formulario a la izquierda, preview a la derecha
+3. Formulario organizado en secciones (Texto, Tipografía, Color, Borde, Sombra, Slide) con grids compactos
+4. Seleccionás opciones, el preview se actualiza automáticamente (AJAX) en la columna derecha
+5. Navegás entre slides con los botones ◀ ▶
+6. Apretás "Generar Carrusel" (botón en columna derecha)
+7. Se guarda el carrusel completo en output/AAAAMMDD_HHMMSS/
+
+⚠️ Bug conocido: alineación "Justificado" no implementada (se comporta como centro)
 
 
 PRUEBAS UNITARIAS

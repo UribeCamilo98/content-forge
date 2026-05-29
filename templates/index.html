@@ -1,75 +1,161 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ContentForge</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
+
 <body>
     <div class="container">
         <h1>ContentForge</h1>
         <p>Generador de carruseles</p>
-        <form action="/generar" method="POST">
-            <label for="texto">Texto del carrusel:</label>
-            <textarea name="texto" id="texto" rows="10" placeholder="Escribí tu texto aquí..." required></textarea>
-            <label for="paleta">Paleta de colores:</label>
-            <select name="paleta" id="paleta">
-                <option value="oscuro">Oscuro</option>
-                <option value="claro">Claro</option>
-                <option value="vibrante">Vibrante</option>
-                <option value="naturaleza">Naturaleza</option>
-                <option value="pastel">Pastel</option>
-                <option value="neon">Neon</option>
-                <option value="sabrina">Sabrina</option>
-            </select>
-
-            <label for="fuente">Fuente:</label>
-            <select name="fuente" id="fuente">
-                <option value="">Predeterminada (Arial)</option>
-                {% for f in fuentes %}
-                <option value="{{ f }}">{{ f }}</option>
-                {% endfor %}
-            </select>
-
-           <label for="tamano">Tamaño de fuente (px):</label>
-            <select name="tamano" id="tamano">
-                {% for v in tamano_opciones %}
-                <option value="{{ v }}" {% if v == 80 %}selected{% endif %}>{{ v }}px</option>
-                {% endfor %}
-            </select>
-
-            <label for="preset_tamano">Tamaño de slide:</label>
-            <select name="preset_tamano" id="preset_tamano">
-                <option value="cuadrado">Cuadrado (1080×1080)</option>
-                <option value="vertical">Vertical (1080×1920)</option>
-                <option value="horizontal">Horizontal (1920×1080)</option>
-            </select>
-
-            <label for="num_slides">Cantidad de slides:</label>
-                <select name="num_slides" id="num_slides">
-                    <option value="">Auto</option>
-                    {% for n in range(1, 21) %}
-                    <option value="{{ n }}">{{ n }}</option>
-                    {% endfor %}
-                </select>
-
-            <label>Alineación:</label>
-            <div class="radio-group">
-                <label><input type="radio" name="alineacion" value="izquierda"> Izquierda</label>
-                <label><input type="radio" name="alineacion" value="centro" checked> Centro</label>
-                <label><input type="radio" name="alineacion" value="derecha"> Derecha</label>
+        <div class="split-layout">
+            <!-- ===== COLUMNA IZQUIERDA: FORMULARIO ===== -->
+            <div class="form-col">
+                <form id="form-preview" method="POST">
+                    <!-- === 1. TEXTO === -->
+                    <fieldset>
+                        <legend>📝 Texto</legend>
+                        <textarea name="texto" id="texto" rows="3" placeholder="Escribí tu texto aquí..."
+                            required></textarea>
+                    </fieldset>
+                    <!-- === 2. TIPOGRAFÍA === -->
+                    <fieldset>
+                        <legend>🔤 Tipografía</legend>
+                        <div class="grid-2">
+                            <label>Fuente:
+                                <select name="fuente">
+                                    <option value="">Predeterminada (Arial)</option>
+                                    {% for f in fuentes %}
+                                    <option value="{{ f }}">{{ f }}</option>
+                                    {% endfor %}
+                                </select>
+                            </label>
+                            <label>Tamaño:
+                                <select name="tamano">
+                                    {% for v in tamano_opciones %}
+                                    <option value="{{ v }}" {% if v==80 %}selected{% endif %}>{{ v }}px</option>
+                                    {% endfor %}
+                                </select>
+                            </label>
+                        </div>
+                        <label>Alineación:</label>
+                        <div class="radio-group">
+                            <label><input type="radio" name="alineacion" value="izquierda"> Izquierda</label>
+                            <label><input type="radio" name="alineacion" value="centro" checked> Centro</label>
+                            <label><input type="radio" name="alineacion" value="derecha"> Derecha</label>
+                            <label><input type="radio" name="alineacion" value="justificado"> Justificado</label>
+                        </div>
+                    </fieldset>
+                    <!-- === 3. COLOR === -->
+                    <fieldset>
+                        <legend>🎨 Color</legend>
+                        <label>Paleta de colores:
+                            <select name="paleta" id="paleta-select">
+                                <option value="">— Personalizado —</option>
+                                {% for nombre, colores in paletas.items() %}
+                                <option value="{{ nombre }}" data-fondo="{{ colores.fondo }}"
+                                    data-texto="{{ colores.texto }}" {% if nombre=='oscuro' %}selected{% endif %}>{{
+                                    nombre | capitalize }}</option>
+                                {% endfor %}
+                            </select>
+                        </label>
+                        <div class="grid-2">
+                            <label>Color de fondo:
+                                <input type="color" name="color_fondo" value="#191923">
+                            </label>
+                            <label>Color de texto:
+                                <input type="color" name="color_texto" value="#ffffff">
+                            </label>
+                        </div>
+                    </fieldset>
+                    <!-- === 4. BORDE === -->
+                    <fieldset>
+                        <legend>✏️ Borde</legend>
+                        <div class="grid-3">
+                            <label>
+                                <input type="checkbox" name="borde_activar" id="borde_activar">
+                                Activar
+                            </label>
+                            <label>Color:
+                                <input type="color" name="borde_color" value="#000000">
+                            </label>
+                            <label>Grosor:
+                                <input type="number" name="borde_grosor" min="1" max="10" value="3">
+                            </label>
+                        </div>
+                    </fieldset>
+                    <!-- === 5. SOMBRA === -->
+                    <fieldset>
+                        <legend>👤 Sombra</legend>
+                        <div class="grid-3">
+                            <label>
+                                <input type="checkbox" name="sombra_activar" id="sombra_activar">
+                                Activar
+                            </label>
+                            <label>Color:
+                                <input type="color" name="sombra_color" value="#808080">
+                            </label>
+                            <label></label>
+                        </div>
+                        <div class="grid-2">
+                            <label>Offset X:
+                                <input type="number" name="sombra_offset_x" min="0" max="20" value="5">
+                            </label>
+                            <label>Offset Y:
+                                <input type="number" name="sombra_offset_y" min="0" max="20" value="5">
+                            </label>
+                        </div>
+                    </fieldset>
+                    <!-- === 6. SLIDE === -->
+                    <fieldset>
+                        <legend>🖼️ Slide</legend>
+                        <div class="grid-2">
+                            <label>Tamaño:
+                                <select name="preset_tamano">
+                                    <option value="cuadrado">Cuadrado (1080×1080)</option>
+                                    <option value="vertical">Vertical (1080×1920)</option>
+                                    <option value="horizontal">Horizontal (1920×1080)</option>
+                                </select>
+                            </label>
+                            <label>Cantidad:
+                                <select name="num_slides">
+                                    <option value="">Auto</option>
+                                    {% for n in range(1, 21) %}
+                                    <option value="{{ n }}">{{ n }}</option>
+                                    {% endfor %}
+                                </select>
+                            </label>
+                        </div>
+                    </fieldset>
+                    <input type="hidden" name="slide_index" id="slide_index" value="0">
+                </form>
+                {% if ruta %}
+                <div class="resultado">
+                    <h2>Carrusel generado</h2>
+                    <p>Ruta: <code>{{ ruta }}</code></p>
+                </div>
+                {% endif %}
             </div>
-
-            <button type="submit">Generar</button>
-        </form>
-        {% if ruta %}
-        <div class="resultado">
-            <h2>Carrusel generado</h2>
-            <p>Ruta: <code>{{ ruta }}</code></p>
+            <!-- ===== COLUMNA DERECHA: PREVIEW ===== -->
+            <div class="preview-col">
+                <div class="preview-container">
+                    <img id="preview-img" src="" alt="Preview">
+                    <div class="nav-controls">
+                        <button type="button" id="prev-slide">◀</button>
+                        <span id="slide-counter">1/1</span>
+                        <button type="button" id="next-slide">▶</button>
+                    </div>
+                    <button type="submit" id="btn-generar" class="btn-generar" form="form-preview">Generar
+                        Carrusel</button>
+                </div>
+            </div>
         </div>
-        {% endif %}
-
     </div>
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
 </body>
+
 </html>

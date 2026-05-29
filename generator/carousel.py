@@ -5,7 +5,9 @@ from generator.base import PlantillaBase
 from config import RUTA_OUTPUT
 
 class Carrusel(PlantillaBase):
-    def __init__(self, textos, color_fondo, color_texto, num_slides=None, fuente=None, tamano=None, alineacion="centro", ancho=None, alto=None):
+    def __init__(self, textos, color_fondo, color_texto, num_slides=None, fuente=None, 
+                 tamano=None, alineacion="centro", ancho=None, alto=None, contorno_color=None,
+                 contorno_grosor=3, sombra_offset=None, sombra_color=(128, 128, 128)):
         super().__init__(color_fondo,color_texto)
         self.textos = self._procesar_textos(textos,num_slides)
         self.tamano = tamano
@@ -13,6 +15,18 @@ class Carrusel(PlantillaBase):
         self.fuente = fuente
         self.ancho = ancho
         self.alto = alto
+        self.contorno_color = contorno_color
+        self.contorno_grosor = contorno_grosor
+        self.sombra_offset = sombra_offset
+        self.sombra_color = sombra_color
+
+    def render_slide(self, indice=0):
+        if indice < 0 or indice >= len(self.textos):
+            indice = 0
+        texto = self.textos[indice]
+        return self._crear_imagen(texto, self.fuente,self.tamano, self.alineacion, self.ancho,
+                                  self.alto, self.contorno_color, self.contorno_grosor, self.sombra_offset,
+                                  self.sombra_color)
 
     def generar(self):
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
@@ -20,7 +34,9 @@ class Carrusel(PlantillaBase):
         os.makedirs(ruta_carpeta,exist_ok=True)
 
         for i, texto in enumerate(self.textos):
-            img = self._crear_imagen(texto, self.fuente, self.tamano, self.alineacion, self.ancho, self.alto)
+            img = self._crear_imagen(texto, self.fuente, self.tamano, self.alineacion, self.ancho, 
+                                     self.alto, self.contorno_color, self.contorno_grosor, self.sombra_offset,
+                                     self.sombra_color)
             nombre = f"slide_{i+1:02d}.png"
             ruta = os.path.join(ruta_carpeta, nombre)
             img.save(ruta)

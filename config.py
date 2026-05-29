@@ -1,6 +1,7 @@
 import os
 
 MARGEN = 80
+TEXTO_AREA = 1080
 
 COLOR_FONDO = (25, 25, 35)
 COLOR_TEXTO = (255, 255, 255)
