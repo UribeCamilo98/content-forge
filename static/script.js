@@ -27,13 +27,18 @@ document.addEventListener('DOMContentLoaded', function(){
                 body: formData
             })
             .then(function(resp) {
-    totalSlides = parseInt(resp.headers.get('X-Total-Slides')) || 1;
-    return resp.blob();
-})
+                totalSlides = parseInt(resp.headers.get('X-Total-Slides')) || 1;
+                return resp.blob();
+            })
             .then(function(blob) {
                 var url = URL.createObjectURL(blob);
                 previewImg.src = url;
                 slideCounter.textContent = (parseInt(slideIndex.value) + 1) + '/' + totalSlides;
+            })
+            .catch(function(err) {
+                console.error('Error en preview:', err);
+                previewImg.src = '';
+                slideCounter.textContent = 'Error';
             });
         }, 300);
     }

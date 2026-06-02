@@ -21,6 +21,10 @@ def home():
 @app.route("/generar", methods=["POST"])
 def generar():
     texto = request.form["texto"]
+    if not texto.strip():
+        return render_template("index.html", error="El texto no puede estar vacío",
+                               fuentes=font_manager.listar_fuentes(),
+                               tamano_opciones=TAMANO_OPCIONES, paletas=PALETAS)
     color_fondo_hex = request.form.get("color_fondo", "")
     color_texto_hex = request.form.get("color_texto", "")
 
