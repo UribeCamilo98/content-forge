@@ -33,7 +33,7 @@ contentforge/
 │   ├── __init__.py
 │   ├── colors.py           # Paletas de colores predefinidas
 │   ├── fonts.py            # Escáner y selector de fuentes ✅
-│   ├── images.py           # ⬅️ PENDIENTE — Gestión de imágenes de fondo
+│   ├── images.py           # Gestión de imágenes de fondo ✅
 │   └── typography.py       # Manejo de fuentes y textos
 │
 ├── templates/              # HTML (Flask los usa para la web)
@@ -49,8 +49,8 @@ contentforge/
 │   ├── test_carousel.py    ✅
 │   └── test_fonts.py       ✅
 │
-└── output/                 # Acá se guardan las imágenes generadas
-    └── YYYYMMDD_HHMMSS/    # 1 carpeta por generación (timestamp)
+└── output/                 # Ruta por defecto (antes carpeta fija)
+    └── YYYYMMDD_HHMMSS/   # El usuario puede elegir ruta personalizada
         ├── slide_01.png
         ├── slide_02.png
         └── ...
@@ -69,11 +69,13 @@ PRINCIPIO MODULAR
   Recibe y pasa parámetros de fuente, tamaño, alineación, contorno, sombra.
 - Carrusel maneja N slides (1-20), cubre casos de quote/anuncio.
 - FontManager = escanea fonts/ y provee lista de fuentes disponibles. ✅
-- ImageManager = administra sets de imágenes en images/.
+- ImageManager = administra imágenes en images/. ✅
+  Métodos: listar_imagenes(), obtener_ruta(), cargar_fondo()
 - LayoutEngine = aplica plantillas predefinidas (texto+imágenes).
   Método público: aplicar(texto, imagenes, template) → dict de posiciones
 - VisualEditor (v1.4) = canvas JS en frontend para edición en vivo.
-- Output simple: cada generación crea su carpeta con timestamp dentro de output/.
+- Output: cada generación crea su carpeta con timestamp. Ruta por defecto en output/,
+  o ruta personalizada elegida por el usuario.
 - Preview vía AJAX: ruta /preview devuelve la imagen renderizada en memoria
   (sin guardar) para mostrarla en el navegador antes de generar el carrusel.
 
@@ -92,10 +94,12 @@ v1.1 (Mejoras tipográficas + preview)            ✅ COMPLETADA (Días 7 ✅, 8
   - Selector de color interactivo (color picker hex)     ✅
   - Preview vía AJAX: renderizar y mostrar imagen        ✅
     en el navegador sin recargar ni guardar
+  - Alineación justificado (espaciado entre palabras)    ✅
 
-v1.2 (Imagen de fondo)                           ⬅️ DESPUÉS
-  - Fondo del slide: imagen en vez de color sólido
-  - Upload y selector de imágenes de fondo
+v1.2 (Imagen de fondo + output flexible)          ⬅️ EN CURSO (DÍA 10a ✅)
+  - Fondo del slide: imagen (carpeta local + upload)
+  - Selector y preview de imágenes de fondo
+  - Output personalizable (elegir ruta de destino)
   - Preview actualizado con el fondo
 
 v1.3 (Imágenes encima + layouts)                 ⬅️ ORIGINAL v1.1
@@ -198,20 +202,30 @@ DÍA 9: Preview vía AJAX — Layout y preparación (v1.1) ✅ COMPLETADO
   - script.js: AJAX con fetch, debounce 300ms, navegación entre slides ✅
   - script.js: header X-Total-Slides para contador correcto de slides ✅
   
-  ⚠️ PENDIENTE: La alineación "Justificado" actualmente se comporta como "Centro".
-    Falta implementar en base.py el cálculo de espaciado entre palabras
-    para que el texto ocupe el ancho completo (v1.1.1 o v1.2).
+DÍA 10a (v1.2): Imagen de fondo — Fase 1: Carpeta local ✅ COMPLETADO
+  - utils/images.py: ImageManager — escanea images/ y provee lista de imágenes
+    disponibles, carga y redimensiona imágenes para usarlas como fondo ✅
+  - tests/test_images.py: tests unitarios para ImageManager ✅
+  - config.py: agregar RUTA_IMAGENES apuntando a la carpeta images/ ✅
 
-DÍA 10: Imagen de fondo (v1.2)
-  - utils/images.py: ImageManager — escanea images/ y provee lista de imágenes disponibles,
-    carga y redimensiona imágenes para usarlas como fondo
-  - base.py: crear_imagen acepta ruta_imagen_fondo opcional; si se provee, la dibuja como
-    capa base en vez del color sólido, y el texto va encima
-  - index.html: selector de imagen de fondo (radio buttons o dropdown con las imágenes
-    disponibles en images/)
-  - app.py: rutas /upload-fondo (POST para subir imágenes de fondo) y pasar ruta_imagen_fondo
-    al Carrusel
+DÍA 10b (v1.2): Imagen de fondo — Fase 2: Integración en base + frontend
+  - base.py: crear_imagen acepta ruta_imagen_fondo opcional; si se provee,
+    reemplaza color sólido como capa base, texto va encima
+  - index.html: selector de imagen de fondo (dropdown/cards con preview
+    de imágenes disponibles en images/)
+  - app.py: pasar ruta_imagen_fondo al Carrusel
   - Preview AJAX actualizado para reflejar el fondo
+
+DÍA 10c (v1.2): Imagen de fondo — Fase 3: Upload de imágenes
+  - app.py: ruta /upload-fondo (POST) para subir imágenes desde el PC
+  - index.html: botón/botonera de upload de imágenes
+  - ImageManager actualizado para refrescar lista tras upload
+
+DÍA 10d (v1.2): Output personalizable
+  - carousel.py: generar() acepta ruta_destino opcional. Si se provee,
+    guarda en ruta_destino/YYYYMMDD_HHMMSS/ en vez de output/
+  - index.html: campo de texto o selector de carpeta para la ruta de destino
+  - app.py: leer ruta_destino del form y pasarla a Carrusel
 
 DÍA 11+: Layouts con imágenes encima (v1.3)
   - utils/layouts.py: LayoutEngine — aplicar plantillas predefinidas
@@ -244,8 +258,6 @@ MVP v1.1 (Días 7-9 ✅)
 5. Navegás entre slides con los botones ◀ ▶
 6. Apretás "Generar Carrusel" (botón en columna derecha)
 7. Se guarda el carrusel completo en output/AAAAMMDD_HHMMSS/
-
-⚠️ Bug conocido: alineación "Justificado" no implementada (se comporta como centro)
 
 
 PRUEBAS UNITARIAS
