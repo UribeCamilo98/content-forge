@@ -7,7 +7,8 @@ from config import RUTA_OUTPUT
 class Carrusel(PlantillaBase):
     def __init__(self, textos, color_fondo, color_texto, num_slides=None, fuente=None, 
                  tamano=None, alineacion="centro", ancho=None, alto=None, contorno_color=None,
-                 contorno_grosor=3, sombra_offset=None, sombra_color=(128, 128, 128)):
+                 contorno_grosor=3, sombra_offset=None, sombra_color=(128, 128, 128),
+                 ruta_imagen_fondo=None, opacidad_imagen=1.0):
         super().__init__(color_fondo,color_texto)
         self.textos = self._procesar_textos(textos,num_slides)
         self.tamano = tamano
@@ -19,6 +20,8 @@ class Carrusel(PlantillaBase):
         self.contorno_grosor = contorno_grosor
         self.sombra_offset = sombra_offset
         self.sombra_color = sombra_color
+        self.ruta_imagen_fondo = ruta_imagen_fondo
+        self.opacidad_imagen = opacidad_imagen
 
     def render_slide(self, indice=0):
         if indice < 0 or indice >= len(self.textos):
@@ -26,17 +29,30 @@ class Carrusel(PlantillaBase):
         texto = self.textos[indice]
         return self._crear_imagen(texto, self.fuente,self.tamano, self.alineacion, self.ancho,
                                   self.alto, self.contorno_color, self.contorno_grosor, self.sombra_offset,
-                                  self.sombra_color)
+                                  self.sombra_color, ruta_imagen_fondo=self.ruta_imagen_fondo,
+                                  opacidad_imagen=self.opacidad_imagen)
 
-    def generar(self):
+    def render_all(self):
+        return [self._crear_imagen(
+            t, self.fuente, self.tamano, self.alineacion, self.ancho,
+            self.alto, self.contorno_color, self.contorno_grosor, self.sombra_offset,
+            self.sombra_color, ruta_imagen_fondo=self.ruta_imagen_fondo,
+            opacidad_imagen=self.opacidad_imagen
+        ) for t in self.textos]
+
+    def generar(self, ruta_destino=None):
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-        ruta_carpeta = os.path.join(RUTA_OUTPUT, timestamp)
+        if ruta_destino:
+            base = ruta_destino
+        else:
+            base = RUTA_OUTPUT
+        ruta_carpeta = os.path.join(base, timestamp)
         os.makedirs(ruta_carpeta,exist_ok=True)
 
         for i, texto in enumerate(self.textos):
             img = self._crear_imagen(texto, self.fuente, self.tamano, self.alineacion, self.ancho, 
                                      self.alto, self.contorno_color, self.contorno_grosor, self.sombra_offset,
-                                     self.sombra_color)
+                                     self.sombra_color, ruta_imagen_fondo=self.ruta_imagen_fondo)
             nombre = f"slide_{i+1:02d}.png"
             ruta = os.path.join(ruta_carpeta, nombre)
             img.save(ruta)

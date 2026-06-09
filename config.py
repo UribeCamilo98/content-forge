@@ -7,6 +7,7 @@ COLOR_FONDO = (25, 25, 35)
 COLOR_TEXTO = (255, 255, 255)
 
 RUTA_OUTPUT = os.path.join(os.path.dirname((__file__)), "output")
+RUTA_IMAGENES = os.path.join(os.path.dirname(__file__), "images")
 
 PRESETS_TAMANO = {
     "cuadrado": (1080, 1080),

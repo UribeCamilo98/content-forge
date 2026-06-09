@@ -33,7 +33,7 @@ contentforge/
 │   ├── __init__.py
 │   ├── colors.py           # Paletas de colores predefinidas
 │   ├── fonts.py            # Escáner y selector de fuentes ✅
-│   ├── images.py           # ⬅️ PENDIENTE — Gestión de imágenes de fondo
+│   ├── images.py           # Gestión de imágenes de fondo ✅
 │   └── typography.py       # Manejo de fuentes y textos
 │
 ├── templates/              # HTML (Flask los usa para la web)
@@ -47,13 +47,10 @@ contentforge/
 │   ├── test_base.py        ✅
 │   ├── test_colors.py      ✅
 │   ├── test_carousel.py    ✅
-│   └── test_fonts.py       ✅
+│   ├── test_fonts.py       ✅
+│   └── test_images.py      ✅
 │
-└── output/                 # Acá se guardan las imágenes generadas
-    └── YYYYMMDD_HHMMSS/    # 1 carpeta por generación (timestamp)
-        ├── slide_01.png
-        ├── slide_02.png
-        └── ...
+└── output/                 # Ya no se usa — los slides se descargan como ZIP
 
 
 PRINCIPIO MODULAR
@@ -69,11 +66,13 @@ PRINCIPIO MODULAR
   Recibe y pasa parámetros de fuente, tamaño, alineación, contorno, sombra.
 - Carrusel maneja N slides (1-20), cubre casos de quote/anuncio.
 - FontManager = escanea fonts/ y provee lista de fuentes disponibles. ✅
-- ImageManager = administra sets de imágenes en images/.
+- ImageManager = administra imágenes en images/. ✅
+  Métodos: listar_imagenes(), obtener_ruta(), cargar_fondo()
 - LayoutEngine = aplica plantillas predefinidas (texto+imágenes).
   Método público: aplicar(texto, imagenes, template) → dict de posiciones
 - VisualEditor (v1.4) = canvas JS en frontend para edición en vivo.
-- Output simple: cada generación crea su carpeta con timestamp dentro de output/.
+- Output: cada generación descarga un ZIP con los slides vía el navegador (diálogo Guardar como).
+  No hay carpeta fija — el usuario elige dónde guardar al descargar.
 - Preview vía AJAX: ruta /preview devuelve la imagen renderizada en memoria
   (sin guardar) para mostrarla en el navegador antes de generar el carrusel.
 
@@ -92,11 +91,15 @@ v1.1 (Mejoras tipográficas + preview)            ✅ COMPLETADA (Días 7 ✅, 8
   - Selector de color interactivo (color picker hex)     ✅
   - Preview vía AJAX: renderizar y mostrar imagen        ✅
     en el navegador sin recargar ni guardar
+  - Alineación justificado (espaciado entre palabras)    ✅
 
-v1.2 (Imagen de fondo)                           ⬅️ DESPUÉS
-  - Fondo del slide: imagen en vez de color sólido
-  - Upload y selector de imágenes de fondo
-  - Preview actualizado con el fondo
+v1.2 (Imagen de fondo + descarga ZIP)              ✅ COMPLETADA (Días 10a ✅, 10b ✅, 10c ✅, 10d ✅, 10e ✅)
+  - Fondo del slide: imagen (carpeta local + upload)     ✅ DÍA 10a-10b
+  - Selector y preview de imágenes de fondo               ✅ DÍA 10b
+  - Opacidad de imagen para legibilidad del texto         ✅ DÍA 10c
+  - Upload de imágenes desde el navegador                 ✅ DÍA 10d
+  - Output como ZIP descargable (sin carpeta fija)        ✅ DÍA 10e
+  - Preview actualizado con el fondo                      ✅ DÍA 10b
 
 v1.3 (Imágenes encima + layouts)                 ⬅️ ORIGINAL v1.1
   - Upload de imágenes + organización en sets
@@ -198,22 +201,53 @@ DÍA 9: Preview vía AJAX — Layout y preparación (v1.1) ✅ COMPLETADO
   - script.js: AJAX con fetch, debounce 300ms, navegación entre slides ✅
   - script.js: header X-Total-Slides para contador correcto de slides ✅
   
-  ⚠️ PENDIENTE: La alineación "Justificado" actualmente se comporta como "Centro".
-    Falta implementar en base.py el cálculo de espaciado entre palabras
-    para que el texto ocupe el ancho completo (v1.1.1 o v1.2).
+DÍA 10a (v1.2): Imagen de fondo — Fase 1: Carpeta local ✅ COMPLETADO
+  - utils/images.py: ImageManager — escanea images/ y provee lista de imágenes
+    disponibles, carga y redimensiona imágenes para usarlas como fondo ✅
+  - tests/test_images.py: tests unitarios para ImageManager ✅
+  - config.py: agregar RUTA_IMAGENES apuntando a la carpeta images/ ✅
 
-DÍA 10: Imagen de fondo (v1.2)
-  - utils/images.py: ImageManager — escanea images/ y provee lista de imágenes disponibles,
-    carga y redimensiona imágenes para usarlas como fondo
-  - base.py: crear_imagen acepta ruta_imagen_fondo opcional; si se provee, la dibuja como
-    capa base en vez del color sólido, y el texto va encima
-  - index.html: selector de imagen de fondo (radio buttons o dropdown con las imágenes
-    disponibles en images/)
-  - app.py: rutas /upload-fondo (POST para subir imágenes de fondo) y pasar ruta_imagen_fondo
-    al Carrusel
-  - Preview AJAX actualizado para reflejar el fondo
+DÍA 10b (v1.2): Imagen de fondo — Fase 2: Integración en base + frontend ✅ COMPLETADO
+  - base.py: _crear_imagen acepta ruta_imagen_fondo opcional; si se provee,
+    abre, convierte a RGB y redimensiona como capa base ✅
+  - carousel.py: ruta_imagen_fondo en __init__, render_slide() y generar() ✅
+  - app.py: importa img_manager, lee imagen_fondo del form en /generar
+    y /preview, pasa ruta resuelta al Carrusel ✅
+  - index.html: fieldset Fondo con select de imágenes disponibles ✅
+  - Preview AJAX actualizado automáticamente (FormData) ✅
+  - Tests: test_base.py y test_carousel.py actualizados con 3 tests nuevos ✅
 
-DÍA 11+: Layouts con imágenes encima (v1.3)
+DÍA 10c (v1.2): Opacidad de imagen de fondo ✅ COMPLETADO
+  - base.py: parámetro opacidad_imagen (float 0.0-1.0) en _crear_imagen().
+    Si opacidad < 1.0, usar Image.blend(imagen_fondo, color_solido, opacidad)
+    para mezclar antes de dibujar texto ✅
+  - carousel.py: pasar opacidad_imagen en __init__, render_slide() y generar() ✅
+  - app.py: leer opacidad_imagen del form (0-100), convertir a float 0.0-1.0 ✅
+  - index.html: slider range 0-100 en fieldset Fondo con label "Opacidad" ✅
+  - script.js: indicador de porcentaje en vivo al mover el slider ✅
+  - Preview AJAX captura automáticamente el nuevo campo ✅
+
+DÍA 10d (v1.2): Imagen de fondo — Fase 3: Upload de imágenes ✅ COMPLETADO
+  - utils/images.py: escaneo por origen (preinstaladas / subidas),
+    método guardar_archivo() con sanitización + timestamp ✅
+  - images/uploads/: subcarpeta para imágenes subidas ✅
+  - app.py: ruta /upload-fondo (POST) + ruta /listar-imagenes (GET) JSON ✅
+  - index.html: select con optgroups "Preinstaladas" / "Subidas",
+    input file + botón "Subir" + feedback visual ✅
+  - static/script.js: upload vía fetch, recargarSelectFondo() sin recargar ✅
+  - tests: 3 tests nuevos (agrupadas, upload válido, extensión inválida) ✅
+
+DÍA 10e (v1.2): Output como ZIP descargable ✅ COMPLETADO
+  - generator/carousel.py: render_all() devuelve lista de PIL Images sin guardar ✅
+  - app.py: /generar crea ZIP en memoria con zipfile + BytesIO,
+    devuelve send_file con Content-Disposition: attachment ✅
+  - templates/index.html: eliminado campo ruta_destino, eliminado resultado,
+    agregado loader "Generando..." ✅
+  - static/script.js: click en "Generar Carrusel" hace fetch, recibe blob,
+    crea link de descarga → diálogo Guardar como nativo ✅
+  - El usuario elige carpeta al descargar (no hay carpeta output/ fija) ✅
+
+DÍA 11+: Layouts con imágenes encima (v1.3) ⬅️ SIGUIENTE
   - utils/layouts.py: LayoutEngine — aplicar plantillas predefinidas
     (texto-izquierda, texto-derecha, texto-centro, collage)
   - base.py: componer imagen final: fondo (color o imagen) + imágenes del layout + texto
@@ -232,8 +266,8 @@ MVP v1.0 ✅ COMPLETADO
 1. Abrís http://localhost:5000
 2. Ves un formulario con textarea + selector de paletas + selector de fuente + slider de tamaño + alineación
 3. Escribís un texto, elegís opciones, apretás "Generar"
-4. Se genera un carrusel de N slides en output/AAAAMMDD_HHMMSS/
-5. Se muestra la ruta de la carpeta generada
+4. Se descarga un ZIP con los slides generados
+5. Elegís carpeta en el diálogo Guardar aso
 
 MVP v1.1 (Días 7-9 ✅)
 ---------------------------
@@ -243,9 +277,7 @@ MVP v1.1 (Días 7-9 ✅)
 4. Seleccionás opciones, el preview se actualiza automáticamente (AJAX) en la columna derecha
 5. Navegás entre slides con los botones ◀ ▶
 6. Apretás "Generar Carrusel" (botón en columna derecha)
-7. Se guarda el carrusel completo en output/AAAAMMDD_HHMMSS/
-
-⚠️ Bug conocido: alineación "Justificado" no implementada (se comporta como centro)
+7. Se descarga un ZIP con los slides — elegís carpeta en Guardar como
 
 
 PRUEBAS UNITARIAS

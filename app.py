@@ -1,9 +1,12 @@
+import io
+import zipfile
+from datetime import datetime
 from flask import Flask, render_template, request, send_file
 from generator.carousel import Carrusel
 from utils.colors import obtener_paleta, PALETAS
 from utils.fonts import font_manager
+from utils.images import img_manager
 from config import PRESETS_TAMANO, TAMANO_OPCIONES
-import io
 
 def hex_a_rgb(h):
     h = h.lstrip("#")
@@ -16,11 +19,15 @@ app = Flask(__name__)
 @app.route("/")
 def home():
     fuentes = font_manager.listar_fuentes()
-    return render_template("index.html", fuentes=fuentes, tamano_opciones=TAMANO_OPCIONES, paletas=PALETAS)
+    return render_template("index.html", fuentes=fuentes, tamano_opciones=TAMANO_OPCIONES, paletas=PALETAS
+                           , imagenes_agrupadas=img_manager.listar_agrupadas())
 
 @app.route("/generar", methods=["POST"])
 def generar():
     texto = request.form["texto"]
+    if not texto.strip():
+        return {"ok": False, "error": "El texto no puede estar vacío"}, 400
+
     color_fondo_hex = request.form.get("color_fondo", "")
     color_texto_hex = request.form.get("color_texto", "")
 
@@ -61,15 +68,29 @@ def generar():
         sombra_offset = None
         sombra_color = (128, 128, 128)
 
-    plantilla = Carrusel(texto, color_fondo, color_texto, fuente=fuente, 
-                         num_slides=num_slides, tamano=tamano, alineacion=alineacion, 
+    imagen_fondo_nombre = request.form.get("imagen_fondo", "")
+    ruta_imagen_fondo = img_manager.obtener_ruta(imagen_fondo_nombre) if imagen_fondo_nombre else None
+    opacidad_str = request.form.get("opacidad_imagen", "100")
+    opacidad_imagen = int(opacidad_str) / 100.0
+
+    plantilla = Carrusel(texto, color_fondo, color_texto, fuente=fuente,
+                         num_slides=num_slides, tamano=tamano, alineacion=alineacion,
                          ancho=ancho, alto=alto, contorno_color=contorno_color,
                          contorno_grosor=contorno_grosor, sombra_offset=sombra_offset,
-                         sombra_color=sombra_color)
-    ruta = plantilla.generar()
+                         sombra_color=sombra_color, ruta_imagen_fondo=ruta_imagen_fondo,
+                         opacidad_imagen=opacidad_imagen)
 
-    return render_template("index.html", ruta = ruta, fuentes=font_manager.listar_fuentes(), 
-                           tamano_opciones=TAMANO_OPCIONES, paletas=PALETAS)
+    imagenes = plantilla.render_all()
+    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+    buf = io.BytesIO()
+    with zipfile.ZipFile(buf, "w", zipfile.ZIP_DEFLATED) as zf:
+        for i, img in enumerate(imagenes):
+            img_buf = io.BytesIO()
+            img.save(img_buf, format="PNG")
+            zf.writestr(f"slide_{i+1:02d}.png", img_buf.getvalue())
+    buf.seek(0)
+    return send_file(buf, mimetype="application/zip", as_attachment=True,
+                     download_name=f"contentforge_{timestamp}.zip")
 
 @app.route("/preview", methods= ["POST"])
 def preview():
@@ -114,6 +135,11 @@ def preview():
         sombra_offset = None
         sombra_color = (128, 128, 128)
 
+    imagen_fondo_nombre = request.form.get("imagen_fondo", "")
+    ruta_imagen_fondo = img_manager.obtener_ruta(imagen_fondo_nombre) if imagen_fondo_nombre else None
+    opacidad_str = request.form.get("opacidad_imagen", "100")
+    opacidad_imagen = int(opacidad_str) / 100.0
+
     slide_index = int(request.form.get("slide_index", 0))
 
     plantilla = Carrusel(
@@ -121,8 +147,8 @@ def preview():
         num_slides=num_slides, tamano=tamano, alineacion=alineacion,
         ancho=ancho, alto=alto, contorno_color=contorno_color,
         contorno_grosor=contorno_grosor, sombra_offset=sombra_offset,
-        sombra_color=sombra_color
-    )
+        sombra_color=sombra_color, ruta_imagen_fondo=ruta_imagen_fondo,
+        opacidad_imagen=opacidad_imagen)
     img = plantilla.render_slide(slide_index)
 
     buf = io.BytesIO()
@@ -132,6 +158,23 @@ def preview():
     resp.headers["X-Total-Slides"] = str(len(plantilla.textos))
     return resp
 
+
+@app.route("/upload-fondo", methods=["POST"])
+def upload_fondo():
+    archivo = request.files.get("archivo")
+    if not archivo or archivo.filename == "":
+        return {"ok": False, "error": "No se envió ningún archivo"}, 400
+    try:
+        contenido = archivo.read()
+        nombre = img_manager.guardar_archivo(archivo.filename, contenido)
+        return {"ok": True, "nombre": nombre}
+    except ValueError as e:
+        return {"ok": False, "error": str(e)}, 400
+
+@app.route("/listar-imagenes")
+def listar_imagenes_json():
+    img_manager.refrescar()
+    return img_manager.listar_agrupadas()
 
 if __name__ == "__main__":
     app.run(debug=True)

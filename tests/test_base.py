@@ -33,3 +33,13 @@ def test_contorno_none_sin_cambio():
     img_sin = pb._crear_imagen("Hola")
     img_con = pb._crear_imagen("Hola", contorno_color=None)
     assert img_sin.tobytes() == img_con.tobytes()
+def test_imagen_fondo_cambia_contenido():
+    import tempfile, os
+    pb = PlantillaBase((255, 0, 0), (0, 0, 0))
+    fondo = Image.new("RGB", (50, 50), (0, 255, 0))
+    with tempfile.NamedTemporaryFile(suffix=".png", delete=False) as f:
+        fondo.save(f.name)
+        img = pb._crear_imagen("Hola", ancho=200, alto=200, ruta_imagen_fondo=f.name)
+    os.unlink(f.name)
+    assert isinstance(img, Image.Image)
+    assert img.size == (200, 200)

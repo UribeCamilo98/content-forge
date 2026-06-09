@@ -27,13 +27,18 @@ document.addEventListener('DOMContentLoaded', function(){
                 body: formData
             })
             .then(function(resp) {
-    totalSlides = parseInt(resp.headers.get('X-Total-Slides')) || 1;
-    return resp.blob();
-})
+                totalSlides = parseInt(resp.headers.get('X-Total-Slides')) || 1;
+                return resp.blob();
+            })
             .then(function(blob) {
                 var url = URL.createObjectURL(blob);
                 previewImg.src = url;
                 slideCounter.textContent = (parseInt(slideIndex.value) + 1) + '/' + totalSlides;
+            })
+            .catch(function(err) {
+                console.error('Error en preview:', err);
+                previewImg.src = '';
+                slideCounter.textContent = 'Error';
             });
         }, 300);
     }
@@ -53,5 +58,125 @@ document.addEventListener('DOMContentLoaded', function(){
             actualizarPreview();
         }
     });
+    var opacidadSlider = document.getElementById('opacidad_imagen');
+    var opacidadValor = document.getElementById('opacidad-valor');
+    if (opacidadSlider && opacidadValor) {
+        opacidadValor.textContent = opacidadSlider.value + '%';
+        opacidadSlider.addEventListener('input', function() {
+            opacidadValor.textContent = this.value + '%';
+        });
+    }
+
+    var uploadInput = document.getElementById('upload-input');
+    var btnUpload = document.getElementById('btn-upload');
+    var uploadMensaje = document.getElementById('upload-mensaje');
+    function recargarSelectFondo(nombreSeleccionado) {
+        fetch('/listar-imagenes')
+        .then(function(r) { return r.json(); })
+        .then(function(data) {
+            var select = document.querySelector('select[name="imagen_fondo"]');
+            var valorActual = select.value;
+            select.innerHTML = '<option value="">Ninguna (color sólido)</option>';
+            if (data.preinstaladas && data.preinstaladas.length) {
+                var optg = document.createElement('optgroup');
+                optg.label = 'Preinstaladas';
+                data.preinstaladas.forEach(function(img) {
+                    var opt = document.createElement('option');
+                    opt.value = img;
+                    opt.textContent = img;
+                    optg.appendChild(opt);
+                });
+                select.appendChild(optg);
+            }
+            if (data.subidas && data.subidas.length) {
+                var optg = document.createElement('optgroup');
+                optg.label = 'Subidas';
+                data.subidas.forEach(function(img) {
+                    var opt = document.createElement('option');
+                    opt.value = img;
+                    opt.textContent = img;
+                    optg.appendChild(opt);
+                });
+                select.appendChild(optg);
+            }
+            if (nombreSeleccionado) {
+                select.value = nombreSeleccionado;
+            } else if (valorActual) {
+                select.value = valorActual;
+            }
+        });
+    }
+    if (btnUpload && uploadInput) {
+        btnUpload.addEventListener('click', function() {
+            var archivo = uploadInput.files[0];
+            if (!archivo) {
+                uploadMensaje.textContent = 'Seleccioná un archivo primero';
+                uploadMensaje.className = 'upload-error';
+                return;
+            }
+            var formData = new FormData();
+            formData.append('archivo', archivo);
+            uploadMensaje.textContent = 'Subiendo...';
+            uploadMensaje.className = '';
+            fetch('/upload-fondo', { method: 'POST', body: formData })
+            .then(function(r) {
+                return r.json().then(function(data) { return { status: r.status, data: data }; });
+            })
+            .then(function(resp) {
+                if (resp.data.ok) {
+                    uploadMensaje.textContent = 'Imagen subida: ' + resp.data.nombre;
+                    uploadMensaje.className = 'upload-success';
+                    uploadInput.value = '';
+                    recargarSelectFondo(resp.data.nombre);
+                    actualizarPreview();
+                } else {
+                    uploadMensaje.textContent = 'Error: ' + resp.data.error;
+                    uploadMensaje.className = 'upload-error';
+                }
+            })
+            .catch(function(err) {
+                uploadMensaje.textContent = 'Error de conexión';
+                uploadMensaje.className = 'upload-error';
+            });
+        });
+    }
+    var btnGenerar = document.getElementById('btn-generar');
+    var generarLoader = document.getElementById('generar-loader');
+    if (btnGenerar) {
+        btnGenerar.addEventListener('click', function() {
+            var formData = new FormData(form);
+            btnGenerar.disabled = true;
+            if (generarLoader) generarLoader.classList.remove('hidden');
+            fetch('/generar', { method: 'POST', body: formData })
+            .then(function(resp) {
+                var contentType = resp.headers.get('Content-Type') || '';
+                if (contentType.includes('application/json')) {
+                    return resp.json().then(function(data) {
+                        alert('Error: ' + (data.error || 'Error al generar'));
+                    });
+                }
+                if (!resp.ok) throw new Error('Error del servidor');
+                return resp.blob().then(function(blob) {
+                    var url = URL.createObjectURL(blob);
+                    var a = document.createElement('a');
+                    a.href = url;
+                    var disposition = resp.headers.get('Content-Disposition') || '';
+                    var match = disposition.match(/filename\*?=(?:UTF-8'')?["']?([^;"'\s]+)/i);
+                    a.download = match ? match[1] : 'contentforge.zip';
+                    document.body.appendChild(a);
+                    a.click();
+                    document.body.removeChild(a);
+                    URL.revokeObjectURL(url);
+                });
+            })
+            .catch(function(err) {
+                alert('Error al generar: ' + err.message);
+            })
+            .finally(function() {
+                btnGenerar.disabled = false;
+                if (generarLoader) generarLoader.classList.add('hidden');
+            });
+        });
+    }
     actualizarPreview();
 });
