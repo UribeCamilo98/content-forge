@@ -9,10 +9,19 @@ class PlantillaBase:
         self.color_texto = color_texto
 
     def _crear_imagen(self, texto, fuente = None, tamano = None, alineacion = "centro", ancho=None, 
-                      alto=None, contorno_color=None, contorno_grosor=3, sombra_offset=None, sombra_color=(128, 128, 128)):
+                      alto=None, contorno_color=None, contorno_grosor=3, sombra_offset=None, sombra_color=(128, 128, 128),
+                      ruta_imagen_fondo = None, opacidad_imagen=1.0):
         if ancho is None and alto is None:
             ancho,alto = PRESETS_TAMANO["cuadrado"]
-        img = Image.new("RGB", (ancho, alto), self.color_fondo)
+        if ruta_imagen_fondo:
+            img = Image.open(ruta_imagen_fondo).convert("RGB")
+            img = img.resize((ancho,alto), Image.LANCZOS)
+            if opacidad_imagen < 1.0:
+                color_solido = Image.new("RGB", (ancho, alto), self.color_fondo)
+                img = Image.blend(color_solido, img, opacidad_imagen)
+                
+        else:
+            img = Image.new("RGB", (ancho, alto), self.color_fondo)
         draw = ImageDraw.Draw(img)
 
         offset_x = (ancho - TEXTO_AREA) //2

@@ -131,6 +131,22 @@
                             </label>
                         </div>
                     </fieldset>
+                     <!-- === 7. FONDO === -->
+                    <fieldset>
+                        <legend>🖼️ Fondo</legend>
+                        <label>Imagen de fondo:
+                            <select name="imagen_fondo">
+                                <option value="">Ninguna (color sólido)</option>
+                                {% for img in imagenes %}
+                                <option value="{{ img }}">{{ img }}</option>
+                                {% endfor %}
+                            </select>
+                        </label>
+                        <label>Opacidad de la imagen:
+                            <input type="range" name="opacidad_imagen" id="opacidad_imagen" min="0" max="100" value="100">
+                            <span id="opacidad-valor">100%</span>
+                        </label>
+                    </fieldset>
                     <input type="hidden" name="slide_index" id="slide_index" value="0">
                 </form>
                 {% if ruta %}

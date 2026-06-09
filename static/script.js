@@ -58,5 +58,13 @@ document.addEventListener('DOMContentLoaded', function(){
             actualizarPreview();
         }
     });
+    var opacidadSlider = document.getElementById('opacidad_imagen');
+    var opacidadValor = document.getElementById('opacidad-valor');
+    if (opacidadSlider && opacidadValor) {
+        opacidadValor.textContent = opacidadSlider.value + '%';
+        opacidadSlider.addEventListener('input', function() {
+            opacidadValor.textContent = this.value + '%';
+        });
+    }
     actualizarPreview();
 });

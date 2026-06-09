@@ -47,7 +47,8 @@ contentforge/
 │   ├── test_base.py        ✅
 │   ├── test_colors.py      ✅
 │   ├── test_carousel.py    ✅
-│   └── test_fonts.py       ✅
+│   ├── test_fonts.py       ✅
+│   └── test_images.py      ✅
 │
 └── output/                 # Ruta por defecto (antes carpeta fija)
     └── YYYYMMDD_HHMMSS/   # El usuario puede elegir ruta personalizada
@@ -96,11 +97,13 @@ v1.1 (Mejoras tipográficas + preview)            ✅ COMPLETADA (Días 7 ✅, 8
     en el navegador sin recargar ni guardar
   - Alineación justificado (espaciado entre palabras)    ✅
 
-v1.2 (Imagen de fondo + output flexible)          ⬅️ EN CURSO (DÍA 10a ✅)
-  - Fondo del slide: imagen (carpeta local + upload)
-  - Selector y preview de imágenes de fondo
-  - Output personalizable (elegir ruta de destino)
-  - Preview actualizado con el fondo
+v1.2 (Imagen de fondo + output flexible)          ⬅️ EN CURSO (DÍA 10a ✅, 10b ✅, 10c ✅)
+  - Fondo del slide: imagen (carpeta local + upload)     ✅ DÍA 10a-10b
+  - Selector y preview de imágenes de fondo               ✅ DÍA 10b
+  - Opacidad de imagen para legibilidad del texto         ✅ DÍA 10c
+  - Upload de imágenes desde el navegador                 ⬅️ DÍA 10d
+  - Output personalizable (elegir ruta de destino)        ⬅️ DÍA 10e
+  - Preview actualizado con el fondo                      ✅ DÍA 10b
 
 v1.3 (Imágenes encima + layouts)                 ⬅️ ORIGINAL v1.1
   - Upload de imágenes + organización en sets
@@ -208,20 +211,32 @@ DÍA 10a (v1.2): Imagen de fondo — Fase 1: Carpeta local ✅ COMPLETADO
   - tests/test_images.py: tests unitarios para ImageManager ✅
   - config.py: agregar RUTA_IMAGENES apuntando a la carpeta images/ ✅
 
-DÍA 10b (v1.2): Imagen de fondo — Fase 2: Integración en base + frontend
-  - base.py: crear_imagen acepta ruta_imagen_fondo opcional; si se provee,
-    reemplaza color sólido como capa base, texto va encima
-  - index.html: selector de imagen de fondo (dropdown/cards con preview
-    de imágenes disponibles en images/)
-  - app.py: pasar ruta_imagen_fondo al Carrusel
-  - Preview AJAX actualizado para reflejar el fondo
+DÍA 10b (v1.2): Imagen de fondo — Fase 2: Integración en base + frontend ✅ COMPLETADO
+  - base.py: _crear_imagen acepta ruta_imagen_fondo opcional; si se provee,
+    abre, convierte a RGB y redimensiona como capa base ✅
+  - carousel.py: ruta_imagen_fondo en __init__, render_slide() y generar() ✅
+  - app.py: importa img_manager, lee imagen_fondo del form en /generar
+    y /preview, pasa ruta resuelta al Carrusel ✅
+  - index.html: fieldset Fondo con select de imágenes disponibles ✅
+  - Preview AJAX actualizado automáticamente (FormData) ✅
+  - Tests: test_base.py y test_carousel.py actualizados con 3 tests nuevos ✅
 
-DÍA 10c (v1.2): Imagen de fondo — Fase 3: Upload de imágenes
+DÍA 10c (v1.2): Opacidad de imagen de fondo ✅ COMPLETADO
+  - base.py: parámetro opacidad_imagen (float 0.0-1.0) en _crear_imagen().
+    Si opacidad < 1.0, usar Image.blend(imagen_fondo, color_solido, opacidad)
+    para mezclar antes de dibujar texto ✅
+  - carousel.py: pasar opacidad_imagen en __init__, render_slide() y generar() ✅
+  - app.py: leer opacidad_imagen del form (0-100), convertir a float 0.0-1.0 ✅
+  - index.html: slider range 0-100 en fieldset Fondo con label "Opacidad" ✅
+  - script.js: indicador de porcentaje en vivo al mover el slider ✅
+  - Preview AJAX captura automáticamente el nuevo campo ✅
+
+DÍA 10d (v1.2): Imagen de fondo — Fase 3: Upload de imágenes
   - app.py: ruta /upload-fondo (POST) para subir imágenes desde el PC
   - index.html: botón/botonera de upload de imágenes
   - ImageManager actualizado para refrescar lista tras upload
 
-DÍA 10d (v1.2): Output personalizable
+DÍA 10e (v1.2): Output personalizable
   - carousel.py: generar() acepta ruta_destino opcional. Si se provee,
     guarda en ruta_destino/YYYYMMDD_HHMMSS/ en vez de output/
   - index.html: campo de texto o selector de carpeta para la ruta de destino
