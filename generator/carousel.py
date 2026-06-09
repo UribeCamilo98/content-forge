@@ -32,16 +32,27 @@ class Carrusel(PlantillaBase):
                                   self.sombra_color, ruta_imagen_fondo=self.ruta_imagen_fondo,
                                   opacidad_imagen=self.opacidad_imagen)
 
-    def generar(self):
+    def render_all(self):
+        return [self._crear_imagen(
+            t, self.fuente, self.tamano, self.alineacion, self.ancho,
+            self.alto, self.contorno_color, self.contorno_grosor, self.sombra_offset,
+            self.sombra_color, ruta_imagen_fondo=self.ruta_imagen_fondo,
+            opacidad_imagen=self.opacidad_imagen
+        ) for t in self.textos]
+
+    def generar(self, ruta_destino=None):
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-        ruta_carpeta = os.path.join(RUTA_OUTPUT, timestamp)
+        if ruta_destino:
+            base = ruta_destino
+        else:
+            base = RUTA_OUTPUT
+        ruta_carpeta = os.path.join(base, timestamp)
         os.makedirs(ruta_carpeta,exist_ok=True)
 
         for i, texto in enumerate(self.textos):
             img = self._crear_imagen(texto, self.fuente, self.tamano, self.alineacion, self.ancho, 
                                      self.alto, self.contorno_color, self.contorno_grosor, self.sombra_offset,
-                                     self.sombra_color, ruta_imagen_fondo=self.ruta_imagen_fondo,
-                                     opacidad_imagen=self.opacidad_imagen)
+                                     self.sombra_color, ruta_imagen_fondo=self.ruta_imagen_fondo)
             nombre = f"slide_{i+1:02d}.png"
             ruta = os.path.join(ruta_carpeta, nombre)
             img.save(ruta)

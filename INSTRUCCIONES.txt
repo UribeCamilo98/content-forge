@@ -50,11 +50,7 @@ contentforge/
 │   ├── test_fonts.py       ✅
 │   └── test_images.py      ✅
 │
-└── output/                 # Ruta por defecto (antes carpeta fija)
-    └── YYYYMMDD_HHMMSS/   # El usuario puede elegir ruta personalizada
-        ├── slide_01.png
-        ├── slide_02.png
-        └── ...
+└── output/                 # Ya no se usa — los slides se descargan como ZIP
 
 
 PRINCIPIO MODULAR
@@ -75,8 +71,8 @@ PRINCIPIO MODULAR
 - LayoutEngine = aplica plantillas predefinidas (texto+imágenes).
   Método público: aplicar(texto, imagenes, template) → dict de posiciones
 - VisualEditor (v1.4) = canvas JS en frontend para edición en vivo.
-- Output: cada generación crea su carpeta con timestamp. Ruta por defecto en output/,
-  o ruta personalizada elegida por el usuario.
+- Output: cada generación descarga un ZIP con los slides vía el navegador (diálogo Guardar como).
+  No hay carpeta fija — el usuario elige dónde guardar al descargar.
 - Preview vía AJAX: ruta /preview devuelve la imagen renderizada en memoria
   (sin guardar) para mostrarla en el navegador antes de generar el carrusel.
 
@@ -97,12 +93,12 @@ v1.1 (Mejoras tipográficas + preview)            ✅ COMPLETADA (Días 7 ✅, 8
     en el navegador sin recargar ni guardar
   - Alineación justificado (espaciado entre palabras)    ✅
 
-v1.2 (Imagen de fondo + output flexible)          ⬅️ EN CURSO (DÍA 10a ✅, 10b ✅, 10c ✅)
+v1.2 (Imagen de fondo + descarga ZIP)              ✅ COMPLETADA (Días 10a ✅, 10b ✅, 10c ✅, 10d ✅, 10e ✅)
   - Fondo del slide: imagen (carpeta local + upload)     ✅ DÍA 10a-10b
   - Selector y preview de imágenes de fondo               ✅ DÍA 10b
   - Opacidad de imagen para legibilidad del texto         ✅ DÍA 10c
-  - Upload de imágenes desde el navegador                 ⬅️ DÍA 10d
-  - Output personalizable (elegir ruta de destino)        ⬅️ DÍA 10e
+  - Upload de imágenes desde el navegador                 ✅ DÍA 10d
+  - Output como ZIP descargable (sin carpeta fija)        ✅ DÍA 10e
   - Preview actualizado con el fondo                      ✅ DÍA 10b
 
 v1.3 (Imágenes encima + layouts)                 ⬅️ ORIGINAL v1.1
@@ -231,18 +227,27 @@ DÍA 10c (v1.2): Opacidad de imagen de fondo ✅ COMPLETADO
   - script.js: indicador de porcentaje en vivo al mover el slider ✅
   - Preview AJAX captura automáticamente el nuevo campo ✅
 
-DÍA 10d (v1.2): Imagen de fondo — Fase 3: Upload de imágenes
-  - app.py: ruta /upload-fondo (POST) para subir imágenes desde el PC
-  - index.html: botón/botonera de upload de imágenes
-  - ImageManager actualizado para refrescar lista tras upload
+DÍA 10d (v1.2): Imagen de fondo — Fase 3: Upload de imágenes ✅ COMPLETADO
+  - utils/images.py: escaneo por origen (preinstaladas / subidas),
+    método guardar_archivo() con sanitización + timestamp ✅
+  - images/uploads/: subcarpeta para imágenes subidas ✅
+  - app.py: ruta /upload-fondo (POST) + ruta /listar-imagenes (GET) JSON ✅
+  - index.html: select con optgroups "Preinstaladas" / "Subidas",
+    input file + botón "Subir" + feedback visual ✅
+  - static/script.js: upload vía fetch, recargarSelectFondo() sin recargar ✅
+  - tests: 3 tests nuevos (agrupadas, upload válido, extensión inválida) ✅
 
-DÍA 10e (v1.2): Output personalizable
-  - carousel.py: generar() acepta ruta_destino opcional. Si se provee,
-    guarda en ruta_destino/YYYYMMDD_HHMMSS/ en vez de output/
-  - index.html: campo de texto o selector de carpeta para la ruta de destino
-  - app.py: leer ruta_destino del form y pasarla a Carrusel
+DÍA 10e (v1.2): Output como ZIP descargable ✅ COMPLETADO
+  - generator/carousel.py: render_all() devuelve lista de PIL Images sin guardar ✅
+  - app.py: /generar crea ZIP en memoria con zipfile + BytesIO,
+    devuelve send_file con Content-Disposition: attachment ✅
+  - templates/index.html: eliminado campo ruta_destino, eliminado resultado,
+    agregado loader "Generando..." ✅
+  - static/script.js: click en "Generar Carrusel" hace fetch, recibe blob,
+    crea link de descarga → diálogo Guardar como nativo ✅
+  - El usuario elige carpeta al descargar (no hay carpeta output/ fija) ✅
 
-DÍA 11+: Layouts con imágenes encima (v1.3)
+DÍA 11+: Layouts con imágenes encima (v1.3) ⬅️ SIGUIENTE
   - utils/layouts.py: LayoutEngine — aplicar plantillas predefinidas
     (texto-izquierda, texto-derecha, texto-centro, collage)
   - base.py: componer imagen final: fondo (color o imagen) + imágenes del layout + texto
@@ -261,8 +266,8 @@ MVP v1.0 ✅ COMPLETADO
 1. Abrís http://localhost:5000
 2. Ves un formulario con textarea + selector de paletas + selector de fuente + slider de tamaño + alineación
 3. Escribís un texto, elegís opciones, apretás "Generar"
-4. Se genera un carrusel de N slides en output/AAAAMMDD_HHMMSS/
-5. Se muestra la ruta de la carpeta generada
+4. Se descarga un ZIP con los slides generados
+5. Elegís carpeta en el diálogo Guardar aso
 
 MVP v1.1 (Días 7-9 ✅)
 ---------------------------
@@ -272,7 +277,7 @@ MVP v1.1 (Días 7-9 ✅)
 4. Seleccionás opciones, el preview se actualiza automáticamente (AJAX) en la columna derecha
 5. Navegás entre slides con los botones ◀ ▶
 6. Apretás "Generar Carrusel" (botón en columna derecha)
-7. Se guarda el carrusel completo en output/AAAAMMDD_HHMMSS/
+7. Se descarga un ZIP con los slides — elegís carpeta en Guardar como
 
 
 PRUEBAS UNITARIAS

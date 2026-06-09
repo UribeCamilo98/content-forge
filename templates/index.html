@@ -134,14 +134,32 @@
                      <!-- === 7. FONDO === -->
                     <fieldset>
                         <legend>🖼️ Fondo</legend>
-                        <label>Imagen de fondo:
-                            <select name="imagen_fondo">
-                                <option value="">Ninguna (color sólido)</option>
-                                {% for img in imagenes %}
+                        <label>Imagen de fondo:</label>
+                        <select name="imagen_fondo">
+                            <option value="">Ninguna (color sólido)</option>
+                            {% if imagenes_agrupadas.preinstaladas %}
+                            <optgroup label="Preinstaladas">
+                                {% for img in imagenes_agrupadas.preinstaladas %}
                                 <option value="{{ img }}">{{ img }}</option>
                                 {% endfor %}
-                            </select>
-                        </label>
+                            </optgroup>
+                            {% endif %}
+                            {% if imagenes_agrupadas.subidas %}
+                            <optgroup label="Subidas">
+                                {% for img in imagenes_agrupadas.subidas %}
+                                <option value="{{ img }}">{{ img }}</option>
+                                {% endfor %}
+                            </optgroup>
+                            {% endif %}
+                        </select>
+                        <div class="upload-area">
+                            <label>Subir nueva imagen:</label>
+                            <div class="upload-row">
+                                <input type="file" id="upload-input" accept="image/png,image/jpeg,image/webp,image/bmp">
+                                <button type="button" id="btn-upload">Subir</button>
+                            </div>
+                            <div id="upload-mensaje"></div>
+                        </div>
                         <label>Opacidad de la imagen:
                             <input type="range" name="opacidad_imagen" id="opacidad_imagen" min="0" max="100" value="100">
                             <span id="opacidad-valor">100%</span>
@@ -149,12 +167,6 @@
                     </fieldset>
                     <input type="hidden" name="slide_index" id="slide_index" value="0">
                 </form>
-                {% if ruta %}
-                <div class="resultado">
-                    <h2>Carrusel generado</h2>
-                    <p>Ruta: <code>{{ ruta }}</code></p>
-                </div>
-                {% endif %}
             </div>
             <!-- ===== COLUMNA DERECHA: PREVIEW ===== -->
             <div class="preview-col">
@@ -165,8 +177,8 @@
                         <span id="slide-counter">1/1</span>
                         <button type="button" id="next-slide">▶</button>
                     </div>
-                    <button type="submit" id="btn-generar" class="btn-generar" form="form-preview">Generar
-                        Carrusel</button>
+                    <button type="button" id="btn-generar" class="btn-generar">Generar Carrusel</button>
+                    <span id="generar-loader" class="loader hidden">Generando...</span>
                 </div>
             </div>
         </div>

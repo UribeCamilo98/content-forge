@@ -1,4 +1,5 @@
 import os
+import shutil
 from generator.carousel import Carrusel
 
 
@@ -63,3 +64,21 @@ def test_generar_crea_carpeta_con_imagenes():
     # Limpieza del test
     import shutil
     shutil.rmtree(ruta)
+
+def test_generar_con_ruta_destino_personalizada(tmp_path):
+    c = Carrusel("Slide uno.\n\nSlide dos.", (0,0,0), (255,255,255))
+    ruta = c.generar(ruta_destino=str(tmp_path))
+    assert os.path.isdir(ruta)
+    assert ruta.startswith(str(tmp_path))
+    archivos = os.listdir(ruta)
+    assert len(archivos) == 2
+    assert all(f.endswith(".png") for f in archivos)
+    shutil.rmtree(ruta)
+
+def test_render_all_devuelve_lista_de_imagenes():
+    from PIL import Image
+    c = Carrusel("Slide A.\n\nSlide B.\n\nSlide C.", (0,0,0), (255,255,255))
+    imagenes = c.render_all()
+    assert len(imagenes) == 3
+    for img in imagenes:
+        assert isinstance(img, Image.Image)
