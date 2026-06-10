@@ -67,6 +67,66 @@ document.addEventListener('DOMContentLoaded', function(){
         });
     }
 
+    function initToggle(checkboxId, controlsId) {
+        var cb = document.getElementById(checkboxId);
+        var ct = document.getElementById(controlsId);
+        if (cb && ct) {
+            ct.classList.toggle('hidden', !cb.checked);
+            cb.addEventListener('change', function() {
+                ct.classList.toggle('hidden', !this.checked);
+            });
+        }
+    }
+    initToggle('borde_activar', 'borde-controls');
+    initToggle('sombra_activar', 'sombra-controls');
+    initToggle('fondo_activar', 'fondo-controls');
+
+    var overlayCheck = document.getElementById('overlay_activo');
+    var overlayControls = document.getElementById('overlay-controls');
+    var overlayPack = document.getElementById('overlay_pack');
+    var overlayArchivo = document.getElementById('overlay_archivo');
+    var overlayTamano = document.getElementById('overlay_tamano');
+    var overlayTamanoValor = document.getElementById('overlay-tamano-valor');
+
+    var overlaysData = typeof OVERLAYS_AGRUPADOS !== 'undefined' ? OVERLAYS_AGRUPADOS : {};
+
+    function actualizarArchivosOverlay() {
+        var pack = overlayPack.value;
+        var archivos = overlaysData[pack] || [];
+        overlayArchivo.innerHTML = '';
+        archivos.forEach(function(a) {
+            var opt = document.createElement('option');
+            opt.value = a;
+            opt.textContent = a;
+            overlayArchivo.appendChild(opt);
+        });
+    }
+
+    if (overlayCheck && overlayControls) {
+        overlayControls.classList.toggle('hidden', !overlayCheck.checked);
+        overlayCheck.addEventListener('change', function() {
+            overlayControls.classList.toggle('hidden', !this.checked);
+            actualizarPreview();
+        });
+    }
+    if (overlayPack) {
+        actualizarArchivosOverlay();
+        overlayPack.addEventListener('change', function() {
+            actualizarArchivosOverlay();
+            actualizarPreview();
+        });
+    }
+    if (overlayArchivo) {
+        overlayArchivo.addEventListener('change', actualizarPreview);
+    }
+    if (overlayTamano && overlayTamanoValor) {
+        overlayTamanoValor.textContent = overlayTamano.value + '%';
+        overlayTamano.addEventListener('input', function() {
+            overlayTamanoValor.textContent = this.value + '%';
+            actualizarPreview();
+        });
+    }
+
     var uploadInput = document.getElementById('upload-input');
     var btnUpload = document.getElementById('btn-upload');
     var uploadMensaje = document.getElementById('upload-mensaje');

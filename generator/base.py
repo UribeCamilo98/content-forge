@@ -8,9 +8,23 @@ class PlantillaBase:
         self.color_fondo = color_fondo
         self.color_texto = color_texto
 
+    def _componer_imagenes(self, fondo, colocaciones):
+        if fondo.mode != "RGBA":
+            fondo = fondo.convert("RGBA")
+        for col in colocaciones:
+            img_overlay = col["imagen"]
+            w, h = col["w"], col["h"]
+            img_redim = img_overlay.resize((w, h), Image.LANCZOS)
+            if img_redim.mode != "RGBA":
+                img_redim = img_redim.convert("RGBA")
+            capa = Image.new("RGBA", fondo.size, (0, 0, 0, 0))
+            capa.paste(img_redim, (col["x"], col["y"]))
+            fondo = Image.alpha_composite(fondo, capa)
+        return fondo
+
     def _crear_imagen(self, texto, fuente = None, tamano = None, alineacion = "centro", ancho=None, 
                       alto=None, contorno_color=None, contorno_grosor=3, sombra_offset=None, sombra_color=(128, 128, 128),
-                      ruta_imagen_fondo = None, opacidad_imagen=1.0):
+                      ruta_imagen_fondo = None, opacidad_imagen=1.0, colocaciones=None):
         if ancho is None and alto is None:
             ancho,alto = PRESETS_TAMANO["cuadrado"]
         if ruta_imagen_fondo:
@@ -19,9 +33,10 @@ class PlantillaBase:
             if opacidad_imagen < 1.0:
                 color_solido = Image.new("RGB", (ancho, alto), self.color_fondo)
                 img = Image.blend(color_solido, img, opacidad_imagen)
-                
         else:
             img = Image.new("RGB", (ancho, alto), self.color_fondo)
+        if colocaciones:
+            img = self._componer_imagenes(img, colocaciones)
         draw = ImageDraw.Draw(img)
 
         offset_x = (ancho - TEXTO_AREA) //2

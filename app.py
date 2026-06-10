@@ -1,11 +1,13 @@
 import io
 import zipfile
 from datetime import datetime
+from PIL import Image
 from flask import Flask, render_template, request, send_file
 from generator.carousel import Carrusel
 from utils.colors import obtener_paleta, PALETAS
 from utils.fonts import font_manager
 from utils.images import img_manager
+from utils.layouts import layout_engine
 from config import PRESETS_TAMANO, TAMANO_OPCIONES
 
 def hex_a_rgb(h):
@@ -20,7 +22,8 @@ app = Flask(__name__)
 def home():
     fuentes = font_manager.listar_fuentes()
     return render_template("index.html", fuentes=fuentes, tamano_opciones=TAMANO_OPCIONES, paletas=PALETAS
-                           , imagenes_agrupadas=img_manager.listar_agrupadas())
+                           , imagenes_agrupadas=img_manager.listar_agrupadas()
+                           , overlays_agrupados=img_manager.listar_overlays_agrupadas())
 
 @app.route("/generar", methods=["POST"])
 def generar():
@@ -68,17 +71,39 @@ def generar():
         sombra_offset = None
         sombra_color = (128, 128, 128)
 
-    imagen_fondo_nombre = request.form.get("imagen_fondo", "")
+    fondo_activar = request.form.get("fondo_activar")
+    imagen_fondo_nombre = request.form.get("imagen_fondo", "") if fondo_activar else ""
     ruta_imagen_fondo = img_manager.obtener_ruta(imagen_fondo_nombre) if imagen_fondo_nombre else None
     opacidad_str = request.form.get("opacidad_imagen", "100")
     opacidad_imagen = int(opacidad_str) / 100.0
+
+    overlay_activo = request.form.get("overlay_activo")
+    colocaciones = None
+    if overlay_activo:
+        overlay_pack = request.form.get("overlay_pack", "placeholder")
+        overlay_archivo = request.form.get("overlay_archivo", "circulo")
+        overlay_posicion = request.form.get("overlay_posicion", "centro")
+        overlay_tamano = int(request.form.get("overlay_tamano", 100))
+        if overlay_pack == "placeholder":
+            img_overlay = layout_engine.generar_placeholder(300, overlay_archivo)
+        else:
+            ruta_img = img_manager.obtener_ruta_overlay(overlay_pack, overlay_archivo)
+            if ruta_img:
+                img_overlay = Image.open(ruta_img).convert("RGBA")
+            else:
+                img_overlay = layout_engine.generar_placeholder(300, "circulo")
+        modo = "detras" if overlay_posicion == "detras" else "imagen"
+        params = {"posicion": overlay_posicion, "tamano_porcentaje": overlay_tamano}
+        col = layout_engine.calcular_colocacion(modo, params, ancho, alto)
+        col["imagen"] = img_overlay
+        colocaciones = [col]
 
     plantilla = Carrusel(texto, color_fondo, color_texto, fuente=fuente,
                          num_slides=num_slides, tamano=tamano, alineacion=alineacion,
                          ancho=ancho, alto=alto, contorno_color=contorno_color,
                          contorno_grosor=contorno_grosor, sombra_offset=sombra_offset,
                          sombra_color=sombra_color, ruta_imagen_fondo=ruta_imagen_fondo,
-                         opacidad_imagen=opacidad_imagen)
+                         opacidad_imagen=opacidad_imagen, colocaciones=colocaciones)
 
     imagenes = plantilla.render_all()
     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
@@ -135,12 +160,34 @@ def preview():
         sombra_offset = None
         sombra_color = (128, 128, 128)
 
-    imagen_fondo_nombre = request.form.get("imagen_fondo", "")
+    fondo_activar = request.form.get("fondo_activar")
+    imagen_fondo_nombre = request.form.get("imagen_fondo", "") if fondo_activar else ""
     ruta_imagen_fondo = img_manager.obtener_ruta(imagen_fondo_nombre) if imagen_fondo_nombre else None
     opacidad_str = request.form.get("opacidad_imagen", "100")
     opacidad_imagen = int(opacidad_str) / 100.0
 
     slide_index = int(request.form.get("slide_index", 0))
+
+    overlay_activo = request.form.get("overlay_activo")
+    colocaciones = None
+    if overlay_activo:
+        overlay_pack = request.form.get("overlay_pack", "placeholder")
+        overlay_archivo = request.form.get("overlay_archivo", "circulo")
+        overlay_posicion = request.form.get("overlay_posicion", "centro")
+        overlay_tamano = int(request.form.get("overlay_tamano", 100))
+        if overlay_pack == "placeholder":
+            img_overlay = layout_engine.generar_placeholder(300, overlay_archivo)
+        else:
+            ruta_img = img_manager.obtener_ruta_overlay(overlay_pack, overlay_archivo)
+            if ruta_img:
+                img_overlay = Image.open(ruta_img).convert("RGBA")
+            else:
+                img_overlay = layout_engine.generar_placeholder(300, "circulo")
+        modo = "detras" if overlay_posicion == "detras" else "imagen"
+        params = {"posicion": overlay_posicion, "tamano_porcentaje": overlay_tamano}
+        col = layout_engine.calcular_colocacion(modo, params, ancho, alto)
+        col["imagen"] = img_overlay
+        colocaciones = [col]
 
     plantilla = Carrusel(
         texto, color_fondo, color_texto, fuente=fuente,
@@ -148,7 +195,7 @@ def preview():
         ancho=ancho, alto=alto, contorno_color=contorno_color,
         contorno_grosor=contorno_grosor, sombra_offset=sombra_offset,
         sombra_color=sombra_color, ruta_imagen_fondo=ruta_imagen_fondo,
-        opacidad_imagen=opacidad_imagen)
+        opacidad_imagen=opacidad_imagen, colocaciones=colocaciones)
     img = plantilla.render_slide(slide_index)
 
     buf = io.BytesIO()

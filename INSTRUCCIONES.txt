@@ -34,6 +34,7 @@ contentforge/
 │   ├── colors.py           # Paletas de colores predefinidas
 │   ├── fonts.py            # Escáner y selector de fuentes ✅
 │   ├── images.py           # Gestión de imágenes de fondo ✅
+│   ├── layouts.py          # LayoutEngine: plantillas imagen+texto ✅
 │   └── typography.py       # Manejo de fuentes y textos
 │
 ├── templates/              # HTML (Flask los usa para la web)
@@ -48,7 +49,8 @@ contentforge/
 │   ├── test_colors.py      ✅
 │   ├── test_carousel.py    ✅
 │   ├── test_fonts.py       ✅
-│   └── test_images.py      ✅
+│   ├── test_images.py      ✅
+│   └── test_layouts.py     ✅
 │
 └── output/                 # Ya no se usa — los slides se descargan como ZIP
 
@@ -101,12 +103,14 @@ v1.2 (Imagen de fondo + descarga ZIP)              ✅ COMPLETADA (Días 10a ✅
   - Output como ZIP descargable (sin carpeta fija)        ✅ DÍA 10e
   - Preview actualizado con el fondo                      ✅ DÍA 10b
 
-v1.3 (Imágenes encima + layouts)                 ⬅️ ORIGINAL v1.1
-  - Upload de imágenes + organización en sets
-  - Layouts predefinidos (texto izq/dcha/centro,
-    collage alrededor)
-  - Ajuste manual de posición/tamaño de imágenes
-  - Preview con imágenes visibles
+v1.3 (Imágenes encima + layouts)                 ⬅️ EN PROGRESO (Día 11)
+  - Overlay decorativo con placeholder              ✅ DÍA 11a
+  - Selector de posición y tamaño del overlay       ✅ DÍA 11a
+  - Show/hide en Borde y Sombra del texto           ✅ DÍA 11a
+  - Rotación, flip, opacidad, borde, sombra overlay ⬅️ DÍA 11b
+  - Modo collage (N imágenes)                       ⬅️ DÍA 11c
+  - Modo tapiz (patrón repetitivo)                  ⬅️ DÍA 11d
+  - Tests finales + packs HeritageType              ⬅️ DÍA 11e
 
 v1.4 (Editor visual completo)                    🔮 FUTURO
   - Canvas en vivo en el navegador
@@ -247,13 +251,80 @@ DÍA 10e (v1.2): Output como ZIP descargable ✅ COMPLETADO
     crea link de descarga → diálogo Guardar como nativo ✅
   - El usuario elige carpeta al descargar (no hay carpeta output/ fija) ✅
 
-DÍA 11+: Layouts con imágenes encima (v1.3) ⬅️ SIGUIENTE
-  - utils/layouts.py: LayoutEngine — aplicar plantillas predefinidas
-    (texto-izquierda, texto-derecha, texto-centro, collage)
-  - base.py: componer imagen final: fondo (color o imagen) + imágenes del layout + texto
-  - index.html: selector de layout, uploader de imágenes, organización en sets
-  - app.py: rutas /upload y /images para servir imágenes de los sets
-  - Preview actualizado con imágenes y layout visibles
+DÍA 11a (v1.3): Modo "imagen" — visible en navegador ✅ COMPLETADO
+  - Crear utils/layouts.py: LayoutEngine con:
+    - Placeholders decorativos: círculo, estrella, diamante, marco
+      (generados con PIL, con transparencia, sin archivos externos)
+    - calcular_colocacion(modo, params, ancho, alto) → dict
+      Soporta: modo "imagen" (posicion: izq/der/arriba/abajo/centro)
+      y modo "detras" (imagen decorativa de fondo).
+      Tamaño configurable 50-200%, permite desborde del canvas.                          ✅
+  - Modificar base.py: _crear_imagen() acepta colocaciones (lista de dicts).
+    Nuevo método _componer_imagenes(fondo, colocaciones):
+    - Convierte fondo a RGBA → pega cada overlay redimensionado
+      respetando transparencia (Image.alpha_composite)
+    - Llamado después del fondo, antes del texto                                           ✅
+  - Modificar carousel.py: acepta colocaciones en __init__ y las pasa
+    a render_slide() / render_all() / generar()                                            ✅
+  - Modificar utils/images.py: escaneo de packs en images/overlays/
+    Método listar_overlays_agrupadas() → {"placeholder": [formas], ...}                    ✅
+  - Modificar app.py:
+    - En / pasar overlays_agrupados al template
+    - En /generar y /preview: leer overlay_activo, overlay_pack,
+      overlay_archivo, overlay_posicion, overlay_tamano
+    - Si overlay_activo: resolver imagen (placeholder o archivo),
+      calcular colocación, pasar al Carrusel                                               ✅
+  - Modificar index.html:
+    - Fieldset "🖼️ Imagen Overlay" con checkbox, select de packs,
+      radio de posición, slider de tamaño                                                  ✅
+    - Borde, Sombra y Fondo del texto: controles ocultos por defecto,
+      se muestran al checkear "Activar" (show/hide)                                        ✅
+  - Modificar script.js: mostrar/ocultar controles según checkbox,
+    cambiar opciones al seleccionar pack, actualizar preview.
+    Función genérica initToggle() para show/hide de Borde, Sombra y Fondo                  ✅
+  - Modificar style.css: estilos para el nuevo fieldset                                    ✅
+  - Tests: test_layouts.py (13 tests: placeholders, calcular_colocacion)                   ✅
+  - Tests: test_base.py (3 tests nuevos: colocaciones se pegan en posición correcta)       ✅
+  - RESULTADO FINAL: formulario web con controles de overlay,
+    preview en vivo con imagen overlay visible sobre el fondo.
+    Borde, Sombra y Fondo ahora con show/hide vía checkbox "Activar".                      ✅
+
+DÍA 11b (v1.3): Modo "imagen" completo — rotación, flip, opacidad, borde, sombra ⬅️ SIGUIENTE
+  - base.py: _componer_imagenes aplica por cada colocación:
+    rotación (.rotate), flip (.transpose), opacidad (alpha blend),
+    borde (draw.rectangle), sombra (sombra offset detrás)
+  - index.html: nuevos controles: rotación (0-360°), flip (toggle),
+    opacidad (slider 0-100%), borde (check + color + grosor),
+    sombra (check + offset xy + color)
+  - script.js: preview con todos los parámetros
+  - Tests: test_base.py con rotación, flip, opacidad, borde, sombra
+
+DÍA 11c (v1.3): Modo "collage" — N imágenes con variación
+  - LayoutEngine.calcular_colocaciones("collage", params):
+    - Genera N colocaciones con posiciones aleatorias
+    - Parámetros: cantidad, tam_min, tam_max, separacion/superposicion,
+      rotacion_aleatoria, area (izq/der/arriba/abajo/alrededor)
+  - index.html: sliders para cantidad, rango de tamaño, toggle
+    separación/superposición
+  - script.js: preview con todas las imágenes del collage
+  - Tests: collage con N colocaciones en rango de tamaño
+
+DÍA 11d (v1.3): Modo "tapiz" — patrón repetitivo
+  - LayoutEngine.calcular_colocaciones("tapiz", params):
+    - Cuadrícula N×M con una o más imágenes
+    - Parámetros: direccion (horizontal/vertical/diagonal),
+      tam_celda, espaciado, rotacion
+  - index.html: selector de dirección, tamaño de celda, espaciado
+  - script.js: preview con patrón visible
+  - Tests: tapiz con cuadrícula correcta
+
+DÍA 11e (v1.3): Tests finales + refinamiento + packs heritage
+  - tests/test_layouts.py completo (todos los modos)
+  - tests/test_base.py: rotación, flip, opacidad, borde, sombra
+  - tests/test_carousel.py: carrusel con overlay genera slides
+  - Descargar e instalar un pack de HeritageType como contenido real
+  - Refinar detalles visuales en CSS
+  - Probar flujo completo: form → preview → descarga ZIP con overlays
 
 v1.4 (Futuro): Editor visual con canvas en vivo
   - Gestión de capas completa

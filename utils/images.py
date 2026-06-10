@@ -72,4 +72,30 @@ class ImageManager:
         self.refrescar()
         return Path(nombre_final).stem
 
+    def _escanear_overlays(self):
+        ruta = self.ruta_base / "overlays"
+        packs = {}
+        if ruta.exists():
+            for item in ruta.iterdir():
+                if item.is_dir():
+                    imagenes = self._escanear_directorio(item)
+                    if imagenes:
+                        packs[item.stem] = list(imagenes.keys())
+        return packs
+
+    def listar_overlays_agrupadas(self):
+        from utils.layouts import LayoutEngine
+        packs = {"placeholder": list(LayoutEngine.FORMAS_PLACEHOLDER)}
+        packs.update(self._escanear_overlays())
+        return packs
+
+    def obtener_ruta_overlay(self, pack, nombre):
+        ruta = self.ruta_base / "overlays" / pack
+        if not ruta.exists():
+            return None
+        for archivo in ruta.iterdir():
+            if archivo.suffix.lower() in self.EXTENSIONES and archivo.stem == nombre:
+                return str(archivo.resolve())
+        return None
+
 img_manager = ImageManager()

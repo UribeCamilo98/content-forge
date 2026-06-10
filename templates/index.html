@@ -75,39 +75,43 @@
                     <!-- === 4. BORDE === -->
                     <fieldset>
                         <legend>✏️ Borde</legend>
-                        <div class="grid-3">
-                            <label>
-                                <input type="checkbox" name="borde_activar" id="borde_activar">
-                                Activar
-                            </label>
-                            <label>Color:
-                                <input type="color" name="borde_color" value="#000000">
-                            </label>
-                            <label>Grosor:
-                                <input type="number" name="borde_grosor" min="1" max="10" value="3">
-                            </label>
+                        <label>
+                            <input type="checkbox" name="borde_activar" id="borde_activar">
+                            Activar
+                        </label>
+                        <div id="borde-controls" class="hidden">
+                            <div class="grid-2">
+                                <label>Color:
+                                    <input type="color" name="borde_color" value="#000000">
+                                </label>
+                                <label>Grosor:
+                                    <input type="number" name="borde_grosor" min="1" max="10" value="3">
+                                </label>
+                            </div>
                         </div>
                     </fieldset>
                     <!-- === 5. SOMBRA === -->
                     <fieldset>
                         <legend>👤 Sombra</legend>
-                        <div class="grid-3">
-                            <label>
-                                <input type="checkbox" name="sombra_activar" id="sombra_activar">
-                                Activar
-                            </label>
-                            <label>Color:
-                                <input type="color" name="sombra_color" value="#808080">
-                            </label>
-                            <label></label>
-                        </div>
-                        <div class="grid-2">
-                            <label>Offset X:
-                                <input type="number" name="sombra_offset_x" min="0" max="20" value="5">
-                            </label>
-                            <label>Offset Y:
-                                <input type="number" name="sombra_offset_y" min="0" max="20" value="5">
-                            </label>
+                        <label>
+                            <input type="checkbox" name="sombra_activar" id="sombra_activar">
+                            Activar
+                        </label>
+                        <div id="sombra-controls" class="hidden">
+                            <div class="grid-2">
+                                <label>Color:
+                                    <input type="color" name="sombra_color" value="#808080">
+                                </label>
+                                <label></label>
+                            </div>
+                            <div class="grid-2">
+                                <label>Offset X:
+                                    <input type="number" name="sombra_offset_x" min="0" max="20" value="5">
+                                </label>
+                                <label>Offset Y:
+                                    <input type="number" name="sombra_offset_y" min="0" max="20" value="5">
+                                </label>
+                            </div>
                         </div>
                     </fieldset>
                     <!-- === 6. SLIDE === -->
@@ -134,36 +138,78 @@
                      <!-- === 7. FONDO === -->
                     <fieldset>
                         <legend>🖼️ Fondo</legend>
-                        <label>Imagen de fondo:</label>
-                        <select name="imagen_fondo">
-                            <option value="">Ninguna (color sólido)</option>
-                            {% if imagenes_agrupadas.preinstaladas %}
-                            <optgroup label="Preinstaladas">
-                                {% for img in imagenes_agrupadas.preinstaladas %}
-                                <option value="{{ img }}">{{ img }}</option>
-                                {% endfor %}
-                            </optgroup>
-                            {% endif %}
-                            {% if imagenes_agrupadas.subidas %}
-                            <optgroup label="Subidas">
-                                {% for img in imagenes_agrupadas.subidas %}
-                                <option value="{{ img }}">{{ img }}</option>
-                                {% endfor %}
-                            </optgroup>
-                            {% endif %}
-                        </select>
-                        <div class="upload-area">
-                            <label>Subir nueva imagen:</label>
-                            <div class="upload-row">
-                                <input type="file" id="upload-input" accept="image/png,image/jpeg,image/webp,image/bmp">
-                                <button type="button" id="btn-upload">Subir</button>
-                            </div>
-                            <div id="upload-mensaje"></div>
-                        </div>
-                        <label>Opacidad de la imagen:
-                            <input type="range" name="opacidad_imagen" id="opacidad_imagen" min="0" max="100" value="100">
-                            <span id="opacidad-valor">100%</span>
+                        <label>
+                            <input type="checkbox" name="fondo_activar" id="fondo_activar">
+                            Activar imagen de fondo
                         </label>
+                        <div id="fondo-controls" class="hidden">
+                            <label>Imagen de fondo:</label>
+                            <select name="imagen_fondo">
+                                <option value="">Ninguna (color sólido)</option>
+                                {% if imagenes_agrupadas.preinstaladas %}
+                                <optgroup label="Preinstaladas">
+                                    {% for img in imagenes_agrupadas.preinstaladas %}
+                                    <option value="{{ img }}">{{ img }}</option>
+                                    {% endfor %}
+                                </optgroup>
+                                {% endif %}
+                                {% if imagenes_agrupadas.subidas %}
+                                <optgroup label="Subidas">
+                                    {% for img in imagenes_agrupadas.subidas %}
+                                    <option value="{{ img }}">{{ img }}</option>
+                                    {% endfor %}
+                                </optgroup>
+                                {% endif %}
+                            </select>
+                            <div class="upload-area">
+                                <label>Subir nueva imagen:</label>
+                                <div class="upload-row">
+                                    <input type="file" id="upload-input" accept="image/png,image/jpeg,image/webp,image/bmp">
+                                    <button type="button" id="btn-upload">Subir</button>
+                                </div>
+                                <div id="upload-mensaje"></div>
+                            </div>
+                            <label>Opacidad de la imagen:
+                                <input type="range" name="opacidad_imagen" id="opacidad_imagen" min="0" max="100" value="100">
+                                <span id="opacidad-valor">100%</span>
+                            </label>
+                        </div>
+                    </fieldset>
+                    <!-- === 8. OVERLAY === -->
+                    <fieldset>
+                        <legend>🖼️ Imagen Overlay</legend>
+                        <label>
+                            <input type="checkbox" name="overlay_activo" id="overlay_activo">
+                            Activar overlay
+                        </label>
+                        <div id="overlay-controls" class="hidden">
+                            <label>Pack:
+                                <select name="overlay_pack" id="overlay_pack">
+                                    {% for pack in overlays_agrupados.keys() %}
+                                    <option value="{{ pack }}" {% if pack=="placeholder" %}selected{% endif %}>
+                                        {{ pack | capitalize }}
+                                    </option>
+                                    {% endfor %}
+                                </select>
+                            </label>
+                            <label>Imagen:
+                                <select name="overlay_archivo" id="overlay_archivo"></select>
+                            </label>
+                            <label>Posición:</label>
+                            <div class="radio-group">
+                                <label><input type="radio" name="overlay_posicion" value="centro" checked> Centro</label>
+                                <label><input type="radio" name="overlay_posicion" value="izquierda"> Izquierda</label>
+                                <label><input type="radio" name="overlay_posicion" value="derecha"> Derecha</label>
+                                <label><input type="radio" name="overlay_posicion" value="arriba"> Arriba</label>
+                                <label><input type="radio" name="overlay_posicion" value="abajo"> Abajo</label>
+                                <label><input type="radio" name="overlay_posicion" value="detras"> Detrás</label>
+                            </div>
+                            <label>Tamaño:
+                                <input type="range" name="overlay_tamano" id="overlay_tamano"
+                                    min="50" max="200" value="100">
+                                <span id="overlay-tamano-valor">100%</span>
+                            </label>
+                        </div>
                     </fieldset>
                     <input type="hidden" name="slide_index" id="slide_index" value="0">
                 </form>
@@ -183,6 +229,9 @@
             </div>
         </div>
     </div>
+    <script>
+        var OVERLAYS_AGRUPADOS = {{ overlays_agrupados | tojson | safe }};
+    </script>
     <script src="{{ url_for('static', filename='script.js') }}"></script>
 </body>
 
