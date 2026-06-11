@@ -12,18 +12,18 @@ class TestPlaceholders:
         assert img.mode == "RGBA"
         assert img.size == (100, 100)
 
-    def test_diamante(self):
-        img = LayoutEngine.generar_placeholder(100, "diamante")
+    def test_cuadrado(self):
+        img = LayoutEngine.generar_placeholder(100, "cuadrado")
         assert img.mode == "RGBA"
         assert img.size == (100, 100)
 
-    def test_marco(self):
-        img = LayoutEngine.generar_placeholder(100, "marco")
+    def test_color_personalizado(self):
+        img = LayoutEngine.generar_placeholder(100, "circulo", (255, 0, 0))
         assert img.mode == "RGBA"
         assert img.size == (100, 100)
 
     def test_formas_disponibles(self):
-        assert LayoutEngine.FORMAS_PLACEHOLDER == ["circulo", "estrella", "diamante", "marco"]
+        assert LayoutEngine.FORMAS_PLACEHOLDER == ["circulo", "estrella", "cuadrado"]
 
 
 class TestCalcularColocacion:

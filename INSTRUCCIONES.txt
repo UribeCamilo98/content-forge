@@ -21,8 +21,13 @@ contentforge/
 │   ├── RubikGlitch-Regular.ttf
 │   └── UncialAntiqua-Regular.ttf
 │
-├── images/                 # Sets de imágenes para fondos/collages
-│   └── (tus colecciones aquí)
+├── images/                 # Sets de imágenes para fondos y overlays
+│   ├── backgrounds/
+│   │   ├── preinstaladas/   # Fondos descargados (dots, hearts, spots, stripes, zigzag)
+│   │   └── subidas/         # Fondos subidos por el usuario vía navegador
+│   └── overlays/
+│       ├── placeholder/     # Generado por código (círculo, estrella, cuadrado)
+│       └── (packs reales aquí)
 │
 ├── generator/              # Módulo de generación de imágenes
 │   ├── __init__.py
@@ -107,7 +112,7 @@ v1.3 (Imágenes encima + layouts)                 ⬅️ EN PROGRESO (Día 11)
   - Overlay decorativo con placeholder              ✅ DÍA 11a
   - Selector de posición y tamaño del overlay       ✅ DÍA 11a
   - Show/hide en Borde y Sombra del texto           ✅ DÍA 11a
-  - Rotación, flip, opacidad, borde, sombra overlay ⬅️ DÍA 11b
+  - Rotación, flip, opacidad, borde, sombra overlay ✅ DÍA 11b
   - Modo collage (N imágenes)                       ⬅️ DÍA 11c
   - Modo tapiz (patrón repetitivo)                  ⬅️ DÍA 11d
   - Tests finales + packs HeritageType              ⬅️ DÍA 11e
@@ -253,7 +258,7 @@ DÍA 10e (v1.2): Output como ZIP descargable ✅ COMPLETADO
 
 DÍA 11a (v1.3): Modo "imagen" — visible en navegador ✅ COMPLETADO
   - Crear utils/layouts.py: LayoutEngine con:
-    - Placeholders decorativos: círculo, estrella, diamante, marco
+    - Placeholders decorativos: círculo, estrella, cuadrado
       (generados con PIL, con transparencia, sin archivos externos)
     - calcular_colocacion(modo, params, ancho, alto) → dict
       Soporta: modo "imagen" (posicion: izq/der/arriba/abajo/centro)
@@ -289,15 +294,27 @@ DÍA 11a (v1.3): Modo "imagen" — visible en navegador ✅ COMPLETADO
     preview en vivo con imagen overlay visible sobre el fondo.
     Borde, Sombra y Fondo ahora con show/hide vía checkbox "Activar".                      ✅
 
-DÍA 11b (v1.3): Modo "imagen" completo — rotación, flip, opacidad, borde, sombra ⬅️ SIGUIENTE
-  - base.py: _componer_imagenes aplica por cada colocación:
-    rotación (.rotate), flip (.transpose), opacidad (alpha blend),
-    borde (draw.rectangle), sombra (sombra offset detrás)
-  - index.html: nuevos controles: rotación (0-360°), flip (toggle),
-    opacidad (slider 0-100%), borde (check + color + grosor),
-    sombra (check + offset xy + color)
-  - script.js: preview con todos los parámetros
-  - Tests: test_base.py con rotación, flip, opacidad, borde, sombra
+DÍA 11b (v1.3): Modo "imagen" completo — rotación, flip, opacidad, borde, sombra ✅ COMPLETADO
+  - base.py: _componer_imagenes ahora aplica por cada colocación:
+    - Flip X/Y con .transpose (antes de rotación)
+    - Rotación con .rotate(expand=True) manteniendo centro
+    - Opacidad individual modificando canal alpha
+    - Borde por outline sobre alpha (MaxFilter + ImageChops.subtract,
+      sigue la silueta de la forma, no un rectángulo)
+    - Sombra con GaussianBlur(radius=4) + 60% opacidad para efecto realista
+  - utils/layouts.py: FORMAS_PLACEHOLDER = ["circulo", "estrella", "cuadrado"]
+    - Color fijo por defecto (azul claro) o configurable por el usuario
+    - Alpha 255 (totalmente opaco, sin transparencia parasitaria)
+    - Se eliminaron "diamante" y "marco" (redundantes con rotación y opacidad)
+  - app.py: lee overlay_rotacion, overlay_flip_x/y, overlay_opacidad,
+    overlay_borde_activar/color/grosor, overlay_sombra_activar/offset/color,
+    overlay_color_ph (color personalizado placeholder)
+  - index.html: controles de rotación (0-360°), flip (2 checkboxes),
+    opacidad (0-100%), borde (check + color + grosor),
+    sombra (check + offset xy + color), color placeholder (show/hide por pack)
+  - script.js: listeners + initToggle para borde/sombra overlay,
+    show/hide color picker según pack seleccionado
+  - Tests: 5 tests nuevos (rotación, flip_x, opacidad, borde, sombra)
 
 DÍA 11c (v1.3): Modo "collage" — N imágenes con variación
   - LayoutEngine.calcular_colocaciones("collage", params):

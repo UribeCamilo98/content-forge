@@ -192,6 +192,9 @@
                                     {% endfor %}
                                 </select>
                             </label>
+                            <label id="ph-color-label" class="hidden">Color placeholder:
+                                <input type="color" name="overlay_color_ph" value="#59aadc">
+                            </label>
                             <label>Imagen:
                                 <select name="overlay_archivo" id="overlay_archivo"></select>
                             </label>
@@ -209,6 +212,63 @@
                                     min="50" max="200" value="100">
                                 <span id="overlay-tamano-valor">100%</span>
                             </label>
+                            <label>Rotación:
+                                <input type="range" name="overlay_rotacion" id="overlay_rotacion"
+                                    min="0" max="360" value="0">
+                                <span id="overlay-rotacion-valor">0°</span>
+                            </label>
+                            <div class="grid-2">
+                                <label><input type="checkbox" name="overlay_flip_x"> Flip X</label>
+                                <label><input type="checkbox" name="overlay_flip_y"> Flip Y</label>
+                            </div>
+                            <label>Opacidad:
+                                <input type="range" name="overlay_opacidad" id="overlay_opacidad"
+                                    min="0" max="100" value="100">
+                                <span id="overlay-opacidad-valor">100%</span>
+                            </label>
+                            <fieldset style="margin-top:8px">
+                                <legend>Borde Overlay</legend>
+                                <label>
+                                    <input type="checkbox" name="overlay_borde_activar" id="overlay_borde_activar">
+                                    Activar
+                                </label>
+                                <div id="overlay-borde-controls" class="hidden">
+                                    <div class="grid-2">
+                                        <label>Color:
+                                            <input type="color" name="overlay_borde_color" value="#000000">
+                                        </label>
+                                        <label>Grosor:
+                                            <input type="range" name="overlay_borde_grosor" id="overlay_borde_grosor"
+                                                min="1" max="10" value="2">
+                                            <span id="overlay-borde-grosor-valor">2</span>
+                                        </label>
+                                    </div>
+                                </div>
+                            </fieldset>
+                            <fieldset style="margin-top:8px">
+                                <legend>Sombra Overlay</legend>
+                                <label>
+                                    <input type="checkbox" name="overlay_sombra_activar" id="overlay_sombra_activar">
+                                    Activar
+                                </label>
+                                <div id="overlay-sombra-controls" class="hidden">
+                                    <label>Color:
+                                        <input type="color" name="overlay_sombra_color" value="#808080">
+                                    </label>
+                                    <div class="grid-2">
+                                        <label>Offset X:
+                                            <input type="range" name="overlay_sombra_offset_x" id="overlay_sombra_offset_x"
+                                                min="0" max="50" value="5">
+                                            <span id="overlay-sombra-offset-x-valor">5</span>
+                                        </label>
+                                        <label>Offset Y:
+                                            <input type="range" name="overlay_sombra_offset_y" id="overlay_sombra_offset_y"
+                                                min="0" max="50" value="5">
+                                            <span id="overlay-sombra-offset-y-valor">5</span>
+                                        </label>
+                                    </div>
+                                </div>
+                            </fieldset>
                         </div>
                     </fieldset>
                     <input type="hidden" name="slide_index" id="slide_index" value="0">

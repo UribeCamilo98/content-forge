@@ -1,25 +1,21 @@
 import math
-import random
 from PIL import Image, ImageDraw
 
 class LayoutEngine:
-    FORMAS_PLACEHOLDER = ["circulo", "estrella", "diamante", "marco"]
+    FORMAS_PLACEHOLDER = ["circulo", "estrella", "cuadrado"]
 
     @staticmethod
-    def generar_placeholder(tamano, forma="circulo"):
+    def generar_placeholder(tamano, forma="circulo", color=None):
         img = Image.new("RGBA", (tamano, tamano), (0, 0, 0, 0))
         draw = ImageDraw.Draw(img)
-        color = (
-            random.randint(100, 255),
-            random.randint(100, 255),
-            random.randint(100, 255),
-            200
-        )
+        if color is None:
+            color = (90, 170, 220)
+        color_con_alpha = (*color, 255)
         margen = 2
         if forma == "circulo":
             draw.ellipse(
                 [margen, margen, tamano - margen, tamano - margen],
-                fill=color
+                fill=color_con_alpha
             )
         elif forma == "estrella":
             cx = cy = tamano // 2
@@ -30,23 +26,11 @@ class LayoutEngine:
                 ang = math.pi / 2 + i * math.pi / 5
                 r = r_ext if i % 2 == 0 else r_int
                 pts.append((cx + r * math.cos(ang), cy - r * math.sin(ang)))
-            draw.polygon(pts, fill=color)
-        elif forma == "diamante":
-            draw.polygon([
-                (tamano // 2, margen),
-                (tamano - margen, tamano // 2),
-                (tamano // 2, tamano - margen),
-                (margen, tamano // 2)
-            ], fill=color)
-        elif forma == "marco":
-            grosor = max(4, tamano // 10)
+            draw.polygon(pts, fill=color_con_alpha)
+        elif forma == "cuadrado":
             draw.rectangle(
                 [margen, margen, tamano - margen, tamano - margen],
-                outline=color, width=grosor
-            )
-            draw.rectangle(
-                [margen, margen, tamano - margen, tamano - margen],
-                fill=(*color[:3], 60)
+                fill=color_con_alpha
             )
         return img
 

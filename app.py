@@ -84,8 +84,30 @@ def generar():
         overlay_archivo = request.form.get("overlay_archivo", "circulo")
         overlay_posicion = request.form.get("overlay_posicion", "centro")
         overlay_tamano = int(request.form.get("overlay_tamano", 100))
+        overlay_rotacion = int(request.form.get("overlay_rotacion", 0))
+        overlay_flip_x = "overlay_flip_x" in request.form
+        overlay_flip_y = "overlay_flip_y" in request.form
+        overlay_opacidad = int(request.form.get("overlay_opacidad", 100)) / 100.0
+        overlay_borde_activar = request.form.get("overlay_borde_activar")
+        if overlay_borde_activar:
+            overlay_borde_color = hex_a_rgb(request.form.get("overlay_borde_color", "#000000"))
+            overlay_borde_grosor = int(request.form.get("overlay_borde_grosor", 2))
+        else:
+            overlay_borde_color = None
+            overlay_borde_grosor = 2
+        overlay_sombra_activar = request.form.get("overlay_sombra_activar")
+        if overlay_sombra_activar:
+            overlay_sombra_sx = int(request.form.get("overlay_sombra_offset_x", 5))
+            overlay_sombra_sy = int(request.form.get("overlay_sombra_offset_y", 5))
+            overlay_sombra_offset = (overlay_sombra_sx, overlay_sombra_sy)
+            overlay_sombra_color = hex_a_rgb(request.form.get("overlay_sombra_color", "#808080"))
+        else:
+            overlay_sombra_offset = None
+            overlay_sombra_color = None
         if overlay_pack == "placeholder":
-            img_overlay = layout_engine.generar_placeholder(300, overlay_archivo)
+            color_ph_hex = request.form.get("overlay_color_ph", "")
+            color_ph = hex_a_rgb(color_ph_hex) if color_ph_hex else None
+            img_overlay = layout_engine.generar_placeholder(300, overlay_archivo, color_ph)
         else:
             ruta_img = img_manager.obtener_ruta_overlay(overlay_pack, overlay_archivo)
             if ruta_img:
@@ -96,6 +118,14 @@ def generar():
         params = {"posicion": overlay_posicion, "tamano_porcentaje": overlay_tamano}
         col = layout_engine.calcular_colocacion(modo, params, ancho, alto)
         col["imagen"] = img_overlay
+        col["rotacion"] = overlay_rotacion
+        col["flip_x"] = overlay_flip_x
+        col["flip_y"] = overlay_flip_y
+        col["opacidad"] = overlay_opacidad
+        col["borde_color"] = overlay_borde_color
+        col["borde_grosor"] = overlay_borde_grosor
+        col["sombra_offset"] = overlay_sombra_offset
+        col["sombra_color"] = overlay_sombra_color
         colocaciones = [col]
 
     plantilla = Carrusel(texto, color_fondo, color_texto, fuente=fuente,
@@ -175,8 +205,30 @@ def preview():
         overlay_archivo = request.form.get("overlay_archivo", "circulo")
         overlay_posicion = request.form.get("overlay_posicion", "centro")
         overlay_tamano = int(request.form.get("overlay_tamano", 100))
+        overlay_rotacion = int(request.form.get("overlay_rotacion", 0))
+        overlay_flip_x = "overlay_flip_x" in request.form
+        overlay_flip_y = "overlay_flip_y" in request.form
+        overlay_opacidad = int(request.form.get("overlay_opacidad", 100)) / 100.0
+        overlay_borde_activar = request.form.get("overlay_borde_activar")
+        if overlay_borde_activar:
+            overlay_borde_color = hex_a_rgb(request.form.get("overlay_borde_color", "#000000"))
+            overlay_borde_grosor = int(request.form.get("overlay_borde_grosor", 2))
+        else:
+            overlay_borde_color = None
+            overlay_borde_grosor = 2
+        overlay_sombra_activar = request.form.get("overlay_sombra_activar")
+        if overlay_sombra_activar:
+            overlay_sombra_sx = int(request.form.get("overlay_sombra_offset_x", 5))
+            overlay_sombra_sy = int(request.form.get("overlay_sombra_offset_y", 5))
+            overlay_sombra_offset = (overlay_sombra_sx, overlay_sombra_sy)
+            overlay_sombra_color = hex_a_rgb(request.form.get("overlay_sombra_color", "#808080"))
+        else:
+            overlay_sombra_offset = None
+            overlay_sombra_color = None
         if overlay_pack == "placeholder":
-            img_overlay = layout_engine.generar_placeholder(300, overlay_archivo)
+            color_ph_hex = request.form.get("overlay_color_ph", "")
+            color_ph = hex_a_rgb(color_ph_hex) if color_ph_hex else None
+            img_overlay = layout_engine.generar_placeholder(300, overlay_archivo, color_ph)
         else:
             ruta_img = img_manager.obtener_ruta_overlay(overlay_pack, overlay_archivo)
             if ruta_img:
@@ -187,6 +239,14 @@ def preview():
         params = {"posicion": overlay_posicion, "tamano_porcentaje": overlay_tamano}
         col = layout_engine.calcular_colocacion(modo, params, ancho, alto)
         col["imagen"] = img_overlay
+        col["rotacion"] = overlay_rotacion
+        col["flip_x"] = overlay_flip_x
+        col["flip_y"] = overlay_flip_y
+        col["opacidad"] = overlay_opacidad
+        col["borde_color"] = overlay_borde_color
+        col["borde_grosor"] = overlay_borde_grosor
+        col["sombra_offset"] = overlay_sombra_offset
+        col["sombra_color"] = overlay_sombra_color
         colocaciones = [col]
 
     plantilla = Carrusel(

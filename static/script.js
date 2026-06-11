@@ -90,6 +90,8 @@ document.addEventListener('DOMContentLoaded', function(){
 
     var overlaysData = typeof OVERLAYS_AGRUPADOS !== 'undefined' ? OVERLAYS_AGRUPADOS : {};
 
+    var phColorLabel = document.getElementById('ph-color-label');
+
     function actualizarArchivosOverlay() {
         var pack = overlayPack.value;
         var archivos = overlaysData[pack] || [];
@@ -100,6 +102,9 @@ document.addEventListener('DOMContentLoaded', function(){
             opt.textContent = a;
             overlayArchivo.appendChild(opt);
         });
+        if (phColorLabel) {
+            phColorLabel.classList.toggle('hidden', pack !== 'placeholder');
+        }
     }
 
     if (overlayCheck && overlayControls) {
@@ -124,6 +129,54 @@ document.addEventListener('DOMContentLoaded', function(){
         overlayTamano.addEventListener('input', function() {
             overlayTamanoValor.textContent = this.value + '%';
             actualizarPreview();
+        });
+    }
+
+    var overlayRotacion = document.getElementById('overlay_rotacion');
+    var overlayRotacionValor = document.getElementById('overlay-rotacion-valor');
+    if (overlayRotacion && overlayRotacionValor) {
+        overlayRotacionValor.textContent = overlayRotacion.value + '°';
+        overlayRotacion.addEventListener('input', function() {
+            overlayRotacionValor.textContent = this.value + '°';
+            actualizarPreview();
+        });
+    }
+
+    var overlayOpacidad = document.getElementById('overlay_opacidad');
+    var overlayOpacidadValor = document.getElementById('overlay-opacidad-valor');
+    if (overlayOpacidad && overlayOpacidadValor) {
+        overlayOpacidadValor.textContent = overlayOpacidad.value + '%';
+        overlayOpacidad.addEventListener('input', function() {
+            overlayOpacidadValor.textContent = this.value + '%';
+            actualizarPreview();
+        });
+    }
+
+    initToggle('overlay_borde_activar', 'overlay-borde-controls');
+    var overlayBordeGrosor = document.getElementById('overlay_borde_grosor');
+    var overlayBordeGrosorValor = document.getElementById('overlay-borde-grosor-valor');
+    if (overlayBordeGrosor && overlayBordeGrosorValor) {
+        overlayBordeGrosorValor.textContent = overlayBordeGrosor.value;
+        overlayBordeGrosor.addEventListener('input', function() {
+            overlayBordeGrosorValor.textContent = this.value;
+        });
+    }
+
+    initToggle('overlay_sombra_activar', 'overlay-sombra-controls');
+    var overlaySombraX = document.getElementById('overlay_sombra_offset_x');
+    var overlaySombraXValor = document.getElementById('overlay-sombra-offset-x-valor');
+    if (overlaySombraX && overlaySombraXValor) {
+        overlaySombraXValor.textContent = overlaySombraX.value;
+        overlaySombraX.addEventListener('input', function() {
+            overlaySombraXValor.textContent = this.value;
+        });
+    }
+    var overlaySombraY = document.getElementById('overlay_sombra_offset_y');
+    var overlaySombraYValor = document.getElementById('overlay-sombra-offset-y-valor');
+    if (overlaySombraY && overlaySombraYValor) {
+        overlaySombraYValor.textContent = overlaySombraY.value;
+        overlaySombraY.addEventListener('input', function() {
+            overlaySombraYValor.textContent = this.value;
         });
     }
 

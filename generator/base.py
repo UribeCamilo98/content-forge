@@ -1,4 +1,4 @@
-from PIL import Image, ImageDraw, ImageFont
+from PIL import Image, ImageDraw, ImageFont, ImageFilter, ImageChops
 from config import PRESETS_TAMANO, MARGEN, TEXTO_AREA
 from utils.typography import dividir_texto
 from utils.fonts import font_manager
@@ -17,8 +17,61 @@ class PlantillaBase:
             img_redim = img_overlay.resize((w, h), Image.LANCZOS)
             if img_redim.mode != "RGBA":
                 img_redim = img_redim.convert("RGBA")
+
+            flip_x = col.get("flip_x", False)
+            flip_y = col.get("flip_y", False)
+            rotacion = col.get("rotacion", 0)
+            opacidad = col.get("opacidad", 1.0)
+            borde_color = col.get("borde_color")
+            borde_grosor = col.get("borde_grosor", 2)
+            sombra_offset = col.get("sombra_offset")
+            sombra_color = col.get("sombra_color")
+
+            if flip_x:
+                img_redim = img_redim.transpose(Image.FLIP_LEFT_RIGHT)
+            if flip_y:
+                img_redim = img_redim.transpose(Image.FLIP_TOP_BOTTOM)
+
+            paste_x, paste_y = col["x"], col["y"]
+            if rotacion:
+                cx = paste_x + img_redim.width // 2
+                cy = paste_y + img_redim.height // 2
+                img_redim = img_redim.rotate(rotacion, expand=True, fillcolor=(0, 0, 0, 0))
+                paste_x = cx - img_redim.width // 2
+                paste_y = cy - img_redim.height // 2
+
+            if opacidad < 1.0:
+                alpha = img_redim.split()[3]
+                alpha = alpha.point(lambda a: int(a * opacidad))
+                img_redim.putalpha(alpha)
+
+            if sombra_offset and sombra_color:
+                sx, sy = sombra_offset
+                r, g, b, a = img_redim.split()
+                sombra_img = Image.new("RGBA", img_redim.size, (*sombra_color, 0))
+                sombra_img.putalpha(a)
+                alpha_borroso = sombra_img.split()[3].filter(
+                    ImageFilter.GaussianBlur(radius=4)
+                )
+                sombra_img.putalpha(alpha_borroso)
+                alpha_s = sombra_img.split()[3]
+                alpha_s = alpha_s.point(lambda v: int(v * 0.6))
+                sombra_img.putalpha(alpha_s)
+                capa_s = Image.new("RGBA", fondo.size, (0, 0, 0, 0))
+                capa_s.paste(sombra_img, (paste_x + sx, paste_y + sy))
+                fondo = Image.alpha_composite(fondo, capa_s)
+
+            if borde_color:
+                a = img_redim.split()[3]
+                kernel = borde_grosor * 2 + 1
+                a_dil = a.filter(ImageFilter.MaxFilter(kernel))
+                outline = ImageChops.subtract(a_dil, a)
+                borde_layer = Image.new("RGBA", img_redim.size, (*borde_color, 255))
+                borde_layer.putalpha(outline)
+                img_redim = Image.alpha_composite(borde_layer, img_redim)
+
             capa = Image.new("RGBA", fondo.size, (0, 0, 0, 0))
-            capa.paste(img_redim, (col["x"], col["y"]))
+            capa.paste(img_redim, (paste_x, paste_y))
             fondo = Image.alpha_composite(fondo, capa)
         return fondo
 
