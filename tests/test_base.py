@@ -117,3 +117,15 @@ def test_colocaciones_none_mismo_comportamiento():
     img_sin = pb._crear_imagen("Hola", ancho=100, alto=100)
     img_con = pb._crear_imagen("Hola", ancho=100, alto=100, colocaciones=None)
     assert img_sin.tobytes() == img_con.tobytes()
+
+def test_multiples_colocaciones_tipo_collage():
+    pb = PlantillaBase((255, 255, 255), (0, 0, 0))
+    rojo = Image.new("RGBA", (20, 20), (255, 0, 0, 255))
+    cols = []
+    for i in range(5):
+        cols.append({"imagen": rojo, "x": i * 30, "y": i * 20, "w": 20, "h": 20})
+    img = pb._crear_imagen("Test", ancho=200, alto=200, colocaciones=cols)
+    assert isinstance(img, Image.Image)
+    # Verificar al menos un píxel rojo
+    px = img.getpixel((5, 5))
+    assert px[0] > 200

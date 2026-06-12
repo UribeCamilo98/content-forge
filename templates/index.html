@@ -19,8 +19,7 @@
                     <!-- === 1. TEXTO === -->
                     <fieldset>
                         <legend>📝 Texto</legend>
-                        <textarea name="texto" id="texto" rows="3" placeholder="Escribí tu texto aquí..."
-                            required></textarea>
+                            <textarea name="texto" id="texto" rows="3" placeholder="Escribí tu texto aquí..."></textarea>
                     </fieldset>
                     <!-- === 2. TIPOGRAFÍA === -->
                     <fieldset>
@@ -183,6 +182,15 @@
                             Activar overlay
                         </label>
                         <div id="overlay-controls" class="hidden">
+                            <!-- Modo selector -->
+                            <label>Modo:
+                                <select name="overlay_modo" id="overlay_modo">
+                                    <option value="imagen" selected>Imagen</option>
+                                    <option value="collage">Collage</option>
+                                    <option value="tapiz">Tapiz</option>
+                                </select>
+                            </label>
+                            <!-- Controles comunes -->
                             <label>Pack:
                                 <select name="overlay_pack" id="overlay_pack">
                                     {% for pack in overlays_agrupados.keys() %}
@@ -198,29 +206,95 @@
                             <label>Imagen:
                                 <select name="overlay_archivo" id="overlay_archivo"></select>
                             </label>
-                            <label>Posición:</label>
-                            <div class="radio-group">
-                                <label><input type="radio" name="overlay_posicion" value="centro" checked> Centro</label>
-                                <label><input type="radio" name="overlay_posicion" value="izquierda"> Izquierda</label>
-                                <label><input type="radio" name="overlay_posicion" value="derecha"> Derecha</label>
-                                <label><input type="radio" name="overlay_posicion" value="arriba"> Arriba</label>
-                                <label><input type="radio" name="overlay_posicion" value="abajo"> Abajo</label>
-                                <label><input type="radio" name="overlay_posicion" value="detras"> Detrás</label>
+                            <!-- Controles solo modo Imagen -->
+                            <div id="overlay-imagen-controls">
+                                <label>Posición:</label>
+                                <div class="pill-group" id="overlay-posicion-group">
+                                    <label class="pill active"><input type="radio" name="overlay_posicion" value="centro" checked> Centro</label>
+                                    <label class="pill"><input type="radio" name="overlay_posicion" value="izquierda"> Izquierda</label>
+                                    <label class="pill"><input type="radio" name="overlay_posicion" value="derecha"> Derecha</label>
+                                    <label class="pill"><input type="radio" name="overlay_posicion" value="arriba"> Arriba</label>
+                                    <label class="pill"><input type="radio" name="overlay_posicion" value="abajo"> Abajo</label>
+                                    <label class="pill"><input type="radio" name="overlay_posicion" value="detras"> Detrás</label>
+                                </div>
+                                <label>Tamaño:
+                                    <input type="range" name="overlay_tamano" id="overlay_tamano"
+                                        min="50" max="200" value="100">
+                                    <span id="overlay-tamano-valor">100%</span>
+                                </label>
+                                <label>Rotación:
+                                    <input type="range" name="overlay_rotacion" id="overlay_rotacion"
+                                        min="0" max="360" value="0">
+                                    <span id="overlay-rotacion-valor">0°</span>
+                                </label>
+                                <div class="grid-2">
+                                    <label><input type="checkbox" name="overlay_flip_x"> Flip X</label>
+                                    <label><input type="checkbox" name="overlay_flip_y"> Flip Y</label>
+                                </div>
                             </div>
-                            <label>Tamaño:
-                                <input type="range" name="overlay_tamano" id="overlay_tamano"
-                                    min="50" max="200" value="100">
-                                <span id="overlay-tamano-valor">100%</span>
-                            </label>
-                            <label>Rotación:
-                                <input type="range" name="overlay_rotacion" id="overlay_rotacion"
-                                    min="0" max="360" value="0">
-                                <span id="overlay-rotacion-valor">0°</span>
-                            </label>
-                            <div class="grid-2">
-                                <label><input type="checkbox" name="overlay_flip_x"> Flip X</label>
-                                <label><input type="checkbox" name="overlay_flip_y"> Flip Y</label>
+                            <!-- Controles solo modo Collage -->
+                            <div id="overlay-collage-controls" class="hidden">
+                                <label>
+                                    <input type="checkbox" name="collage_usar_todas" id="collage_usar_todas">
+                                    Usar todas las imágenes del pack
+                                </label>
+                                <input type="hidden" name="collage_seed" id="collage_seed" value="{{ collage_seed }}">
+                                <button type="button" id="btn-reordenar" class="pill" style="margin-top:8px">🔀 Reordenar</button>
+                                <div class="grid-2">
+                                    <label>Cantidad:
+                                        <input type="number" name="collage_cantidad" min="1" max="30" value="5">
+                                    </label>
+                                    <label>Separación:
+                                        <input type="range" name="collage_separacion" id="collage_separacion"
+                                            min="0" max="100" value="50">
+                                        <span id="collage-separacion-valor">50%</span>
+                                    </label>
+                                </div>
+                                <div class="grid-2">
+                                    <label>Tamaño mín:
+                                        <input type="range" name="collage_tam_min" id="collage_tam_min"
+                                            min="10" max="100" value="30">
+                                        <span id="collage-tam-min-valor">30%</span>
+                                    </label>
+                                    <label>Tamaño máx:
+                                        <input type="range" name="collage_tam_max" id="collage_tam_max"
+                                            min="50" max="200" value="100">
+                                        <span id="collage-tam-max-valor">100%</span>
+                                    </label>
+                                </div>
+                                <label>Área:</label>
+                                <div class="pill-group" id="collage-area-group">
+                                    <label class="pill active"><input type="radio" name="collage_area" value="alrededor" checked> Alrededor</label>
+                                    <label class="pill"><input type="radio" name="collage_area" value="izquierda"> Izquierda</label>
+                                    <label class="pill"><input type="radio" name="collage_area" value="derecha"> Derecha</label>
+                                    <label class="pill"><input type="radio" name="collage_area" value="arriba"> Arriba</label>
+                                    <label class="pill"><input type="radio" name="collage_area" value="abajo"> Abajo</label>
+                                </div>
+                                <label>
+                                    <input type="checkbox" name="collage_rotacion_aleatoria" id="collage_rotacion_aleatoria">
+                                    Rotación aleatoria
+                                </label>
                             </div>
+                            <!-- Controles solo modo Tapiz -->
+                            <div id="overlay-tapiz-controls" class="hidden">
+                                <label>Dirección:</label>
+                                <div class="pill-group" id="tapiz-direccion-group">
+                                    <label class="pill active"><input type="radio" name="tapiz_direccion" value="horizontal" checked> Horizontal</label>
+                                    <label class="pill"><input type="radio" name="tapiz_direccion" value="vertical"> Vertical</label>
+                                    <label class="pill"><input type="radio" name="tapiz_direccion" value="diagonal"> Diagonal</label>
+                                </div>
+                                <label>Tamaño celda:
+                                    <input type="range" name="tapiz_tam_celda" id="tapiz_tam_celda"
+                                        min="50" max="400" value="150">
+                                    <span id="tapiz-tam-celda-valor">150px</span>
+                                </label>
+                                <label>Espaciado:
+                                    <input type="range" name="tapiz_espaciado" id="tapiz_espaciado"
+                                        min="0" max="100" value="10">
+                                    <span id="tapiz-espaciado-valor">10px</span>
+                                </label>
+                            </div>
+                            <!-- Controles comunes (opacidad, borde, sombra) -->
                             <label>Opacidad:
                                 <input type="range" name="overlay_opacidad" id="overlay_opacidad"
                                     min="0" max="100" value="100">
@@ -292,7 +366,7 @@
     <script>
         var OVERLAYS_AGRUPADOS = {{ overlays_agrupados | tojson | safe }};
     </script>
-    <script src="{{ url_for('static', filename='script.js') }}"></script>
+    <script src="{{ url_for('static', filename='script.js') }}?v=2"></script>
 </body>
 
 </html>

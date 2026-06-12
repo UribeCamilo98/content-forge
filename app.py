@@ -1,6 +1,8 @@
 import io
+import random
 import zipfile
 from datetime import datetime
+from pathlib import Path
 from PIL import Image
 from flask import Flask, render_template, request, send_file
 from generator.carousel import Carrusel
@@ -21,9 +23,11 @@ app = Flask(__name__)
 @app.route("/")
 def home():
     fuentes = font_manager.listar_fuentes()
+    seed = random.randint(0, 2147483646)
     return render_template("index.html", fuentes=fuentes, tamano_opciones=TAMANO_OPCIONES, paletas=PALETAS
                            , imagenes_agrupadas=img_manager.listar_agrupadas()
-                           , overlays_agrupados=img_manager.listar_overlays_agrupadas())
+                           , overlays_agrupados=img_manager.listar_overlays_agrupadas()
+                           , collage_seed=seed)
 
 @app.route("/generar", methods=["POST"])
 def generar():
@@ -82,11 +86,7 @@ def generar():
     if overlay_activo:
         overlay_pack = request.form.get("overlay_pack", "placeholder")
         overlay_archivo = request.form.get("overlay_archivo", "circulo")
-        overlay_posicion = request.form.get("overlay_posicion", "centro")
-        overlay_tamano = int(request.form.get("overlay_tamano", 100))
-        overlay_rotacion = int(request.form.get("overlay_rotacion", 0))
-        overlay_flip_x = "overlay_flip_x" in request.form
-        overlay_flip_y = "overlay_flip_y" in request.form
+        overlay_modo = request.form.get("overlay_modo", "imagen")
         overlay_opacidad = int(request.form.get("overlay_opacidad", 100)) / 100.0
         overlay_borde_activar = request.form.get("overlay_borde_activar")
         if overlay_borde_activar:
@@ -114,19 +114,84 @@ def generar():
                 img_overlay = Image.open(ruta_img).convert("RGBA")
             else:
                 img_overlay = layout_engine.generar_placeholder(300, "circulo")
-        modo = "detras" if overlay_posicion == "detras" else "imagen"
-        params = {"posicion": overlay_posicion, "tamano_porcentaje": overlay_tamano}
-        col = layout_engine.calcular_colocacion(modo, params, ancho, alto)
-        col["imagen"] = img_overlay
-        col["rotacion"] = overlay_rotacion
-        col["flip_x"] = overlay_flip_x
-        col["flip_y"] = overlay_flip_y
-        col["opacidad"] = overlay_opacidad
-        col["borde_color"] = overlay_borde_color
-        col["borde_grosor"] = overlay_borde_grosor
-        col["sombra_offset"] = overlay_sombra_offset
-        col["sombra_color"] = overlay_sombra_color
-        colocaciones = [col]
+        if overlay_modo == "imagen":
+            overlay_posicion = request.form.get("overlay_posicion", "centro")
+            overlay_tamano = int(request.form.get("overlay_tamano", 100))
+            overlay_rotacion = int(request.form.get("overlay_rotacion", 0))
+            overlay_flip_x = "overlay_flip_x" in request.form
+            overlay_flip_y = "overlay_flip_y" in request.form
+            modo = "detras" if overlay_posicion == "detras" else "imagen"
+            params = {"posicion": overlay_posicion, "tamano_porcentaje": overlay_tamano}
+            col = layout_engine.calcular_colocacion(modo, params, ancho, alto)
+            col["imagen"] = img_overlay
+            col["rotacion"] = overlay_rotacion
+            col["flip_x"] = overlay_flip_x
+            col["flip_y"] = overlay_flip_y
+            col["opacidad"] = overlay_opacidad
+            col["borde_color"] = overlay_borde_color
+            col["borde_grosor"] = overlay_borde_grosor
+            col["sombra_offset"] = overlay_sombra_offset
+            col["sombra_color"] = overlay_sombra_color
+            colocaciones = [col]
+        elif overlay_modo == "collage":
+            collage_cantidad = int(request.form.get("collage_cantidad", 5))
+            collage_separacion = int(request.form.get("collage_separacion", 50))
+            collage_tam_min = int(request.form.get("collage_tam_min", 30))
+            collage_tam_max = int(request.form.get("collage_tam_max", 100))
+            collage_area = request.form.get("collage_area", "alrededor")
+            collage_rotacion_aleatoria = "collage_rotacion_aleatoria" in request.form
+            params = {"cantidad": collage_cantidad, "tam_min": collage_tam_min,
+                      "tam_max": collage_tam_max, "area": collage_area,
+                      "separacion": collage_separacion,
+                      "rotacion_aleatoria": collage_rotacion_aleatoria}
+            collage_usar_todas = "collage_usar_todas" in request.form
+            collage_seed = request.form.get("collage_seed", "")
+            if collage_seed:
+                random.seed(int(collage_seed))
+            cols = layout_engine.calcular_colocaciones("collage", params, ancho, alto)
+
+            if collage_usar_todas and overlay_pack != "placeholder":
+                imagenes_overlay = []
+                ruta_pack = Path(__file__).resolve().parent / "images" / "overlays" / overlay_pack
+                ext_validas = {".png", ".jpg", ".jpeg", ".webp", ".bmp"}
+                if ruta_pack.exists():
+                    for arch in sorted(ruta_pack.iterdir()):
+                        if arch.suffix.lower() in ext_validas:
+                            imagenes_overlay.append(Image.open(arch).convert("RGBA"))
+                if not imagenes_overlay:
+                    imagenes_overlay = [img_overlay]
+                for col in cols:
+                    col["imagen"] = random.choice(imagenes_overlay)
+            else:
+                for col in cols:
+                    col["imagen"] = img_overlay
+
+            for col in cols:
+                col["flip_x"] = False
+                col["flip_y"] = False
+                col["opacidad"] = overlay_opacidad
+                col["borde_color"] = overlay_borde_color
+                col["borde_grosor"] = overlay_borde_grosor
+                col["sombra_offset"] = overlay_sombra_offset
+                col["sombra_color"] = overlay_sombra_color
+            colocaciones = cols
+        elif overlay_modo == "tapiz":
+            tapiz_direccion = request.form.get("tapiz_direccion", "horizontal")
+            tapiz_tam_celda = int(request.form.get("tapiz_tam_celda", 150))
+            tapiz_espaciado = int(request.form.get("tapiz_espaciado", 10))
+            params = {"direccion": tapiz_direccion, "tam_celda": tapiz_tam_celda,
+                      "espaciado": tapiz_espaciado}
+            cols = layout_engine.calcular_colocaciones("tapiz", params, ancho, alto)
+            for col in cols:
+                col["imagen"] = img_overlay
+                col["flip_x"] = False
+                col["flip_y"] = False
+                col["opacidad"] = overlay_opacidad
+                col["borde_color"] = overlay_borde_color
+                col["borde_grosor"] = overlay_borde_grosor
+                col["sombra_offset"] = overlay_sombra_offset
+                col["sombra_color"] = overlay_sombra_color
+            colocaciones = cols
 
     plantilla = Carrusel(texto, color_fondo, color_texto, fuente=fuente,
                          num_slides=num_slides, tamano=tamano, alineacion=alineacion,
@@ -203,11 +268,7 @@ def preview():
     if overlay_activo:
         overlay_pack = request.form.get("overlay_pack", "placeholder")
         overlay_archivo = request.form.get("overlay_archivo", "circulo")
-        overlay_posicion = request.form.get("overlay_posicion", "centro")
-        overlay_tamano = int(request.form.get("overlay_tamano", 100))
-        overlay_rotacion = int(request.form.get("overlay_rotacion", 0))
-        overlay_flip_x = "overlay_flip_x" in request.form
-        overlay_flip_y = "overlay_flip_y" in request.form
+        overlay_modo = request.form.get("overlay_modo", "imagen")
         overlay_opacidad = int(request.form.get("overlay_opacidad", 100)) / 100.0
         overlay_borde_activar = request.form.get("overlay_borde_activar")
         if overlay_borde_activar:
@@ -235,19 +296,84 @@ def preview():
                 img_overlay = Image.open(ruta_img).convert("RGBA")
             else:
                 img_overlay = layout_engine.generar_placeholder(300, "circulo")
-        modo = "detras" if overlay_posicion == "detras" else "imagen"
-        params = {"posicion": overlay_posicion, "tamano_porcentaje": overlay_tamano}
-        col = layout_engine.calcular_colocacion(modo, params, ancho, alto)
-        col["imagen"] = img_overlay
-        col["rotacion"] = overlay_rotacion
-        col["flip_x"] = overlay_flip_x
-        col["flip_y"] = overlay_flip_y
-        col["opacidad"] = overlay_opacidad
-        col["borde_color"] = overlay_borde_color
-        col["borde_grosor"] = overlay_borde_grosor
-        col["sombra_offset"] = overlay_sombra_offset
-        col["sombra_color"] = overlay_sombra_color
-        colocaciones = [col]
+        if overlay_modo == "imagen":
+            overlay_posicion = request.form.get("overlay_posicion", "centro")
+            overlay_tamano = int(request.form.get("overlay_tamano", 100))
+            overlay_rotacion = int(request.form.get("overlay_rotacion", 0))
+            overlay_flip_x = "overlay_flip_x" in request.form
+            overlay_flip_y = "overlay_flip_y" in request.form
+            modo = "detras" if overlay_posicion == "detras" else "imagen"
+            params = {"posicion": overlay_posicion, "tamano_porcentaje": overlay_tamano}
+            col = layout_engine.calcular_colocacion(modo, params, ancho, alto)
+            col["imagen"] = img_overlay
+            col["rotacion"] = overlay_rotacion
+            col["flip_x"] = overlay_flip_x
+            col["flip_y"] = overlay_flip_y
+            col["opacidad"] = overlay_opacidad
+            col["borde_color"] = overlay_borde_color
+            col["borde_grosor"] = overlay_borde_grosor
+            col["sombra_offset"] = overlay_sombra_offset
+            col["sombra_color"] = overlay_sombra_color
+            colocaciones = [col]
+        elif overlay_modo == "collage":
+            collage_cantidad = int(request.form.get("collage_cantidad", 5))
+            collage_separacion = int(request.form.get("collage_separacion", 50))
+            collage_tam_min = int(request.form.get("collage_tam_min", 30))
+            collage_tam_max = int(request.form.get("collage_tam_max", 100))
+            collage_area = request.form.get("collage_area", "alrededor")
+            collage_rotacion_aleatoria = "collage_rotacion_aleatoria" in request.form
+            params = {"cantidad": collage_cantidad, "tam_min": collage_tam_min,
+                      "tam_max": collage_tam_max, "area": collage_area,
+                      "separacion": collage_separacion,
+                      "rotacion_aleatoria": collage_rotacion_aleatoria}
+            collage_usar_todas = "collage_usar_todas" in request.form
+            collage_seed = request.form.get("collage_seed", "")
+            if collage_seed:
+                random.seed(int(collage_seed))
+            cols = layout_engine.calcular_colocaciones("collage", params, ancho, alto)
+
+            if collage_usar_todas and overlay_pack != "placeholder":
+                imagenes_overlay = []
+                ruta_pack = Path(__file__).resolve().parent / "images" / "overlays" / overlay_pack
+                ext_validas = {".png", ".jpg", ".jpeg", ".webp", ".bmp"}
+                if ruta_pack.exists():
+                    for arch in sorted(ruta_pack.iterdir()):
+                        if arch.suffix.lower() in ext_validas:
+                            imagenes_overlay.append(Image.open(arch).convert("RGBA"))
+                if not imagenes_overlay:
+                    imagenes_overlay = [img_overlay]
+                for col in cols:
+                    col["imagen"] = random.choice(imagenes_overlay)
+            else:
+                for col in cols:
+                    col["imagen"] = img_overlay
+
+            for col in cols:
+                col["flip_x"] = False
+                col["flip_y"] = False
+                col["opacidad"] = overlay_opacidad
+                col["borde_color"] = overlay_borde_color
+                col["borde_grosor"] = overlay_borde_grosor
+                col["sombra_offset"] = overlay_sombra_offset
+                col["sombra_color"] = overlay_sombra_color
+            colocaciones = cols
+        elif overlay_modo == "tapiz":
+            tapiz_direccion = request.form.get("tapiz_direccion", "horizontal")
+            tapiz_tam_celda = int(request.form.get("tapiz_tam_celda", 150))
+            tapiz_espaciado = int(request.form.get("tapiz_espaciado", 10))
+            params = {"direccion": tapiz_direccion, "tam_celda": tapiz_tam_celda,
+                      "espaciado": tapiz_espaciado}
+            cols = layout_engine.calcular_colocaciones("tapiz", params, ancho, alto)
+            for col in cols:
+                col["imagen"] = img_overlay
+                col["flip_x"] = False
+                col["flip_y"] = False
+                col["opacidad"] = overlay_opacidad
+                col["borde_color"] = overlay_borde_color
+                col["borde_grosor"] = overlay_borde_grosor
+                col["sombra_offset"] = overlay_sombra_offset
+                col["sombra_color"] = overlay_sombra_color
+            colocaciones = cols
 
     plantilla = Carrusel(
         texto, color_fondo, color_texto, fuente=fuente,

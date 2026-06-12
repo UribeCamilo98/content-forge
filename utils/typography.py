@@ -18,10 +18,10 @@ def ajustar_tamano_fuente(texto, ancho_maximo, tamano_inicial=80, ruta_fuente = 
 def dividir_texto(texto, max_lineas=5):
     palabras = texto.split()
     if max_lineas <= 1 or len(palabras) <= 1:
-        return[texto]
-    
+        return [texto]
+
     num_lineas = min(max_lineas, len(palabras))
-    palabras_por_linea = (len(palabras) + num_lineas -1) // num_lineas
+    palabras_por_linea = (len(palabras) + num_lineas - 1) // num_lineas
     lineas = []
     for i in range(0, len(palabras), palabras_por_linea):
         grupo = palabras[i:i + palabras_por_linea]

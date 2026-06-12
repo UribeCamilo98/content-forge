@@ -101,25 +101,55 @@ class PlantillaBase:
         else:
             ruta_fuente = "C:/Windows/Fonts/arial.ttf"
 
-        palabras = texto.split()
-        len_palabras = max(len(palabras), 1)
         tamano_inicial = tamano if tamano else 80
         tamano_fuente = tamano_inicial
-        
-        
-        while True:
-            target_lines = max(2, min(len_palabras, int(TEXTO_AREA * 0.75 / tamano_fuente)))
-            lineas = dividir_texto(texto,max_lineas=target_lines)
-            linea_mas_larga = max(lineas, key=len)
+
+        if '\n' in texto:
+            lineas = texto.split('\n')
+            while True:
+                fuente_pil = ImageFont.truetype(ruta_fuente, tamano_fuente)
+                linea_mas_larga = max(lineas, key=len)
+                bbox = draw.textbbox((0, 0), linea_mas_larga, font=fuente_pil)
+                ancho_necesario = bbox[2] - bbox[0]
+                alto_necesario = len(lineas) * tamano_fuente
+                if ancho_necesario <= ancho_disponible and alto_necesario <= TEXTO_AREA:
+                    break
+                tamano_fuente -= 2
+                if tamano_fuente < 12:
+                    break
+        else:
+            palabras = texto.split()
+            len_palabras = max(len(palabras), 1)
+            best_font_size = 12
+            best_lines = [texto]
+
+            for n in range(1, len_palabras + 1):
+                candidate_lines = dividir_texto(texto, max_lineas=n)
+
+                max_por_altura = TEXTO_AREA // n
+                lo, hi = 12, min(tamano_inicial, max_por_altura)
+                best_n = 12
+                while lo <= hi:
+                    mid = (lo + hi) // 2
+                    tmp_font = ImageFont.truetype(ruta_fuente, mid)
+                    longest = max(candidate_lines, key=len)
+                    bbox = draw.textbbox((0, 0), longest, font=tmp_font)
+                    if (bbox[2] - bbox[0]) <= ancho_disponible:
+                        best_n = mid
+                        lo = mid + 1
+                    else:
+                        hi = mid - 1
+
+                if best_n > best_font_size or (best_n == best_font_size and n < len(best_lines)):
+                    best_font_size = best_n
+                    best_lines = candidate_lines
+
+                if best_font_size == tamano_inicial:
+                    break
+
+            tamano_fuente = best_font_size
+            lineas = best_lines
             fuente_pil = ImageFont.truetype(ruta_fuente, tamano_fuente)
-            bbox = draw.textbbox((0, 0), linea_mas_larga, font=fuente_pil)
-            ancho_necesario = bbox[2] - bbox[0]
-            alto_necesario = len(lineas) * tamano_fuente
-            if ancho_necesario <= ancho_disponible and alto_necesario <= TEXTO_AREA:
-                break
-            tamano_fuente -= 2
-            if tamano_fuente < 12:
-                break
     
 
 

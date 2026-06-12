@@ -180,6 +180,78 @@ document.addEventListener('DOMContentLoaded', function(){
         });
     }
 
+    /* ---- Modo overlay: imagen / collage / tapiz ---- */
+    var modoSelect = document.getElementById('overlay_modo');
+    var imagenControls = document.getElementById('overlay-imagen-controls');
+    var collageControls = document.getElementById('overlay-collage-controls');
+    var tapizControls = document.getElementById('overlay-tapiz-controls');
+
+    function cambiarModoOverlay(modo) {
+        if (imagenControls) imagenControls.classList.toggle('hidden', modo !== 'imagen');
+        if (collageControls) collageControls.classList.toggle('hidden', modo !== 'collage');
+        if (tapizControls) tapizControls.classList.toggle('hidden', modo !== 'tapiz');
+    }
+
+    if (modoSelect) {
+        modoSelect.addEventListener('change', function() {
+            cambiarModoOverlay(this.value);
+            actualizarPreview();
+        });
+        cambiarModoOverlay(modoSelect.value);
+    }
+
+    /* Sliders collage */
+    function initSliderValor(sliderId, spanId, sufijo) {
+        var s = document.getElementById(sliderId);
+        var sp = document.getElementById(spanId);
+        if (s && sp) {
+            sp.textContent = s.value + (sufijo || '');
+            s.addEventListener('input', function() {
+                sp.textContent = this.value + (sufijo || '');
+                actualizarPreview();
+            });
+        }
+    }
+    initSliderValor('collage_separacion', 'collage-separacion-valor', '%');
+    initSliderValor('collage_tam_min', 'collage-tam-min-valor', '%');
+    initSliderValor('collage_tam_max', 'collage-tam-max-valor', '%');
+    initSliderValor('tapiz_tam_celda', 'tapiz-tam-celda-valor', 'px');
+    initSliderValor('tapiz_espaciado', 'tapiz-espaciado-valor', 'px');
+
+    /* Sincronizar píldoras de área */
+    function sincronizarPills(grupoId) {
+        var grupo = document.getElementById(grupoId);
+        if (!grupo) return;
+        var pills = grupo.querySelectorAll('.pill');
+        pills.forEach(function(p) {
+            var radio = p.querySelector('input[type="radio"]');
+            p.classList.toggle('active', radio && radio.checked);
+        });
+    }
+    function initPillGroup(grupoId) {
+        var grupo = document.getElementById(grupoId);
+        if (!grupo) return;
+        var radios = grupo.querySelectorAll('input[type="radio"]');
+        radios.forEach(function(r) {
+            r.addEventListener('change', function() {
+                sincronizarPills(grupoId);
+            });
+        });
+    }
+    initPillGroup('collage-area-group');
+    initPillGroup('overlay-posicion-group');
+    initPillGroup('tapiz-direccion-group');
+
+    /* Seed collage — estabiliza posiciones */
+    var collageSeedInput = document.getElementById('collage_seed');
+    var btnReordenar = document.getElementById('btn-reordenar');
+    if (btnReordenar) {
+        btnReordenar.addEventListener('click', function() {
+            collageSeedInput.value = Math.floor(Math.random() * 2147483647).toString();
+            actualizarPreview();
+        });
+    }
+
     var uploadInput = document.getElementById('upload-input');
     var btnUpload = document.getElementById('btn-upload');
     var uploadMensaje = document.getElementById('upload-mensaje');

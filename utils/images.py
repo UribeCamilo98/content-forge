@@ -10,7 +10,8 @@ class ImageManager:
 
     def __init__(self):
         self.ruta_base = Path(RUTA_IMAGENES)
-        self.ruta_uploads = self.ruta_base / "uploads"
+        self.ruta_preinstaladas = self.ruta_base / "backgrounds" / "preinstaladas"
+        self.ruta_subidas = self.ruta_base / "backgrounds" / "subidas"
         self.preinstaladas = {}
         self.subidas = {}
         self._escanear_todo()
@@ -24,8 +25,8 @@ class ImageManager:
         return imagenes
 
     def _escanear_todo(self):
-        self.preinstaladas = self._escanear_directorio(self.ruta_base)
-        self.subidas = self._escanear_directorio(self.ruta_uploads)
+        self.preinstaladas = self._escanear_directorio(self.ruta_preinstaladas)
+        self.subidas = self._escanear_directorio(self.ruta_subidas)
 
     def _combinar(self):
         d = {}
@@ -61,12 +62,12 @@ class ImageManager:
         ext = Path(nombre_archivo).suffix.lower()
         if ext not in self.EXTENSIONES:
             raise ValueError(f"Extensión no permitida: {ext}")
-        self.ruta_uploads.mkdir(parents=True, exist_ok=True)
+        self.ruta_subidas.mkdir(parents=True, exist_ok=True)
         stem = Path(nombre_archivo).stem
         stem_seguro = re.sub(r"[^a-zA-Z0-9_\-]", "_", stem)[:60]
         timestamp = __import__("datetime").datetime.now().strftime("%Y%m%d_%H%M%S")
         nombre_final = f"{stem_seguro}_{timestamp}{ext}"
-        ruta_destino = self.ruta_uploads / nombre_final
+        ruta_destino = self.ruta_subidas / nombre_final
         with open(ruta_destino, "wb") as f:
             f.write(contenido)
         self.refrescar()

@@ -98,29 +98,60 @@ class Carrusel(PlantillaBase):
         
         return resultado
 
+    def _detectar_lista(self, texto):
+        lineas = texto.split('\n')
+        items = []
+        for linea in lineas:
+            linea_stripped = linea.strip()
+            if not linea_stripped:
+                continue
+            if linea_stripped.startswith('* ') or linea_stripped.startswith('- '):
+                items.append(linea_stripped[2:].strip())
+            else:
+                return None
+        return items if items else None
+
+    def _formatear_lista(self, items):
+        return '\n'.join(f'• {item}' for item in items)
+
     def _procesar_textos(self, textos, num_slides=None):
-        texto_normalizado= textos.replace('\r\n', '\n')
+        if not textos or not textos.strip():
+            return [""]
+        texto_normalizado = textos.replace('\r\n', '\n')
         parrafos_raw = texto_normalizado.split('\n\n')
         parrafos = []
+        tipos = []
+
         for p in parrafos_raw:
             p_limpio = p.strip()
-            if p_limpio != "":
+            if not p_limpio:
+                continue
+
+            items = self._detectar_lista(p_limpio)
+            if items is not None:
+                parrafos.append(self._formatear_lista(items))
+                tipos.append('list')
+            else:
                 parrafos.append(p_limpio)
+                tipos.append('text')
 
         oraciones_por_parrafo = []
-        for p in parrafos:
-            oraciones = self._dividir_oraciones(p)
-            oraciones_por_parrafo.append(oraciones)
+        for p, tipo in zip(parrafos, tipos):
+            if tipo == 'list':
+                oraciones_por_parrafo.append([p])
+            else:
+                oraciones = self._dividir_oraciones(p)
+                oraciones_por_parrafo.append(oraciones)
 
-        cant_parrafos=len(parrafos)
+        cant_parrafos = len(parrafos)
         if num_slides is None:
             num_slides = min(cant_parrafos, 20)
         else:
-            num_slides = min(num_slides,20)
+            num_slides = min(num_slides, 20)
 
         if num_slides == cant_parrafos:
             return parrafos
-        
+
         if num_slides < cant_parrafos:
             todas = []
             for oraciones in oraciones_por_parrafo:
@@ -128,5 +159,5 @@ class Carrusel(PlantillaBase):
             return self._distribuir(todas, num_slides)
 
         if num_slides > cant_parrafos:
-            return self._dividir_parrafos(oraciones_por_parrafo,cant_parrafos,num_slides)
+            return self._dividir_parrafos(oraciones_por_parrafo, cant_parrafos, num_slides)
 
